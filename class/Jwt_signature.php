@@ -1,5 +1,8 @@
 <?php
-class jwt_signature {
+/*this class either veryfies the signature or creates one for JWT
+if only on argamunt is provided it creates signature for the argument
+if two arguments provided it compares them to see if they match */
+class Jwt_signature {
     public $valid = false;
     public $signature = "not working";
     function __construct(){

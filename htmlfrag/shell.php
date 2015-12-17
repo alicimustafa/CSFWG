@@ -17,15 +17,9 @@
 	        <li>
 	            <a href="index.php?request=about">About</a>
 	        </li>
-	        <li>
-	            <a href="index.php?request=archive">Archive</a>
-	        </li>
-	        <li>
-	            <a href="index.php?request=profile">Profile</a>
-	        </li>
-	        <li>
-	            <a href="index.php?request=members">Members</a>
-	        </li>
+	        <?php 
+	        echo $logged_navbar;
+	        ?>
 	        <li>
 	            <a href="index.php?request=groups">Groups</a>
 	        </li>
@@ -53,7 +47,7 @@
         <?php include($main_pannel);?>
     </div>
     <div id="log-pannel">
-        log in pannel
+        <?php include("htmlfrag/logging.php");  ?>
     </div>
     <div id="social-pannel">
         <ul>
