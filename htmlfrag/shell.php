@@ -4,6 +4,7 @@
 <head>
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <link rel="stylesheet" type="text/css" href="css/CSFWG.css" />
+<script src="javascript/CSFWG.js"></script>
 <title>Untitled 1</title>
 </head>
 
@@ -11,31 +12,31 @@
 <div id="wrap">
 	<div id="nav-bar">
 	    <ul>
-	        <li>
-	            <a href="index.php?request=home">Home</a>
+            <li>
+	            <a href="index.php?request=home" class="nav-link" data-link="home">Home</a>
 	        </li>
 	        <li>
-	            <a href="index.php?request=about">About</a>
-	        </li>
-	        <?php 
-	        echo $logged_navbar;
-	        ?>
-	        <li>
-	            <a href="index.php?request=groups">Groups</a>
+	            <a href="index.php?request=about" class="nav-link" data-link="about">About</a>
 	        </li>
 	        <li>
-	            <a href="index.php?request=workshop">Workshop</a>
+	            <a href="index.php?request=groups" class="nav-link" data-link="groups">Groups</a>
 	        </li>
 	        <li>
-	            <a href="index.php?request=resources">Resources</a>
+	            <a href="index.php?request=workshop" class="nav-link" data-link="workshop">Workshop</a>
 	        </li>
 	        <li>
-	            Calendar
-	            <div id="calendar-panel">
-	            
-	            </div>
+	            <a href="index.php?request=resources" class="nav-link" data-link="resources">Resources</a>
+	        </li>
+	        <li>
+	            <a href="index.php?request=archive" class="nav-link" <?php echo $nav_display ?> data-link="archive">Archive</a>
+	        </li>
+	        <li>
+	            <a href="index.php?request=members" class="nav-link" <?php echo $nav_display ?> data-link="members">Members</a>
 	        </li>
 	    </ul>
+	    <div id="calendar-pannel">
+	    Calender
+	    </div>
 	</div>
     <div id="logo">
         <img src="images/CSFWG2013.jpg" width="200" height="113" alt="logo" />
@@ -43,8 +44,11 @@
     <div id="right-pannel">
         some stuff here for the right pannel
     </div>
+    <div id="inner-wrap">
+    <div id="loading-pannel" style="display:none"></div>
     <div id="main-pannel">
         <?php include($main_pannel);?>
+    </div>
     </div>
     <div id="log-pannel">
         <?php include("htmlfrag/logging.php");  ?>

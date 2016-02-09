@@ -4,26 +4,20 @@ it will read the request send the proper page info
 if there no request it will just send the home page */
 include("crt_functions.php");
 include("class/Jwt_signature.php");
-include("class/Read_url.php");
-//fallowing will list navgation bar links displayed only to loged members
-$logged_navbar = "";
+include("class/Request_obj.php");
+/* this will create and request object that will hold 
+info used in the rest of the site */
+$request_obj = new Request_obj; 
+
+//fallowing will list navgation bar links displayed depends on loged and valid
+if($request_obj->valid_user){
+    $nav_display = 'style="display:inline"';
+} else {
+    $nav_display = 'style="display:none"';
+}
 if(isset($_REQUEST['request'])){
-    $read_url = new Read_url($_REQUEST['request']);
-    //fallowing will list navgation bar links displayed only to loged members
-    if($read_url->valid_user){
-        $logged_navbar = '
-	        <li>
-	            <a href="index.php?request=archive">Archive</a>
-	        </li>
-	        <li>
-	            <a href="index.php?request=profile">Profile</a>
-	        </li>
-	        <li>
-	            <a href="index.php?request=members">Members</a>
-	        </li>
-        ';
-    }
-    switch ($read_url->end_point){
+    $request_obj->read_url($_REQUEST['request']);
+    switch ($request_obj->end_point){
         case "home":
             $main_pannel = "htmlfrag/home.php";
             break;
@@ -31,21 +25,21 @@ if(isset($_REQUEST['request'])){
             $main_pannel = "htmlfrag/about.php";
             break;
         case "archive":
-            if($read_url->valid_user){
+            if($request_obj->valid_user){
                 $main_pannel = "htmlfrag/archive.php";
             } else {
                 $main_pannel = "htmlfrag/unauthorize.php";
             }
             break;
         case "members":
-            if($read_url->valid_user){
+            if($request_obj->valid_user){
                 $main_pannel = "htmlfrag/members.php";
             } else {
                 $main_pannel = "htmlfrag/unauthorize.php";
             }
             break;
         case "profile":
-            if($read_url->valid_user){
+            if($request_obj->valid_user){
                 $main_pannel = "htmlfrag/profile.php";
             } else {
                 $main_pannel = "htmlfrag/unauthorize.php";
@@ -60,10 +54,13 @@ if(isset($_REQUEST['request'])){
         case "groups":
             $main_pannel = "htmlfrag/groups.php";
             break;
+        case "logging":
+            $main_pannel = "htmlfrag/logging.php";
+            break;
         default :
             $main_pannel = "htmlfrag/error.php";
     }
-    if($read_url->section){
+    if($request_obj->section){
         include($main_pannel);
     } else {
         include("htmlfrag/shell.php");  

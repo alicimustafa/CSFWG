@@ -11,4 +11,8 @@ if(!function_exists('hash_equals')) {
     }
   }
 }
-?>
+function test_input($data) {
+    $data = trim($data);
+   	$data = htmlspecialchars($data);
+   	return $data;
+}
