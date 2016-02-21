@@ -137,23 +137,49 @@ body {
 /* end */
 
 /* members page styles begin */
+.rotate-button {
+	float:right;
+	clear:both;
+}
+#back-members , #front-members {
+	position:absolute;
+	-webkit-backface-visibility:hidden;
+	backface-visibility:hidden;
+	-webkit-transition: -webkit-transform 0.3s;
+	transition: transform 0.3s;
+	background: #FFFFFF
+}
+#back-members {
+	-webkit-transform:rotateY(180deg);
+	transform:rotateY(180deg)
+}
+#front-members.flipped {
+	-webkit-transform:rotateY(180deg);
+	transform:rotateY(180deg)
+}
+#back-members.flipped {
+	-webkit-transform:rotateY(0deg);
+	transform:rotateY(0deg)
+}
+.member-section {
+	float:left;
+	width:30em
+}
 
-#members-list {
+.members-list {
     float:left;
     width:30em
 }
-#group-list {
+.group-section {
     float:right;
-    width:22em
+    width:28em
 }
 .high-drop {
     background:#66FF66
 }
-.temp-place {
-    color:#CC0000
-}
-.temp-remove {
-    text-decoration:line-through
+#add-member {
+	float:left;
+	clear:both
 }
 /* members page styles end */
 #loading-pannel{

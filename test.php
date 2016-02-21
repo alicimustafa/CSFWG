@@ -36,7 +36,7 @@ if(isset($_POST['json_text'])){
     echo "<p>this the json : $json_text </p>";
 }
 if(isset($_POST['token'])){
-    $sig_test = new jwt_signature($_POST['json_test'] , $_POST['token']);
+    $sig_test = new Jwt_signature($_POST['json_test'] , $_POST['token']);
     $verified = $sig_test->valid;
     if($verified){ $val ="true";}
     else { $val ="false";}
