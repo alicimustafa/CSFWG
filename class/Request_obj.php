@@ -2,12 +2,13 @@
 /* 
 this class read the incomming url request determine what is the end point.
 breaks up argument into an array and set the method type used
-determine if only section of a page or a whole page
+determine if only section of a page or a whole page and if front pannel or back
 checks to see if the user has a valid token and if valid sets the user name and account type
 */   
 class Request_obj {
     public $valid_user = false;  
     public $user_name = ""; 
+	public $user_id = "";
     public $account_priv = "member";      
     public $end_point = "";   
     public $arg = array();    
@@ -27,6 +28,7 @@ class Request_obj {
 						$jwt_claims = json_decode($jwt_body);
 						$this->user_name = $jwt_claims->sub;
 						$this->account_priv = $jwt_claims->acc;
+						$this->user_id = $jwt_claims->id;
 					}
 				}
 			}
@@ -44,7 +46,11 @@ class Request_obj {
 			$this->back = true;
 			$this->end_point = array_shift($this->arg);
 		}
-        $this->action = $_SERVER['REQUEST_METHOD'];  // checking method
+        $this->action = $_SERVER['REQUEST_METHOD'];  
+		/* 
+		checking method and if it is delete or put place the 
+		variables from the client into $_REQUEST global
+		*/
         if($this->action == 'DELETE' or $this->action == "PUT"){
 			parse_str(file_get_contents('php://input'), $this->params);
 			foreach($this->params as $key => $value){

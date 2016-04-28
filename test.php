@@ -1,58 +1,56 @@
-<?php
-include("class/jwt_signature.php");
-if(!function_exists('hash_equals')) {
-  function hash_equals($str1, $str2) {
-    if(strlen($str1) != strlen($str2)) {
-      return false;
-    } else {
-      $res = $str1 ^ $str2;
-      $ret = 0;
-      for($i = strlen($res) - 1; $i >= 0; $i--) $ret |= ord($res[$i]);
-      return !$ret;
-    }
-  }
-}
-
-?>
-<!DOCTYPE html>
-<html>
-
-<head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-<title>Untitled 1</title>
-</head>
-
-<body>
-<form action="test.php" method="post" >
-    <input type="text" name="json_text">
-    <input type="submit">
-</form>
-<?php
-if(isset($_POST['json_text'])){
-    $sig_gen = new jwt_signature($_POST['json_text']);
-    $sig = $sig_gen->signature;
-    $json_text = $_POST['json_text'];
-    echo "<p>this is the signature : $sig </p>";
-    echo "<p>this the json : $json_text </p>";
-}
-if(isset($_POST['token'])){
-    $sig_test = new Jwt_signature($_POST['json_test'] , $_POST['token']);
-    $verified = $sig_test->valid;
-    if($verified){ $val ="true";}
-    else { $val ="false";}
-    $json_test = $_POST['json_test'];
-    $token = $_POST['token'];
-    echo "<p>this is the signature : $token </p>";
-    echo "<p>this is the json : $json_test </p>";
-    echo "<p>is it valid : $val </p>";
-}
-?>
-
-<form action="test.php" method="post" >
-    jason:<input type="text" name="json_test">
-    <input type="text" name="token" >
-    <input type="submit">
-</form>
-</body>
-
-</html>
+	<div id="front-pannel" class="rotateable  ">
+		<button class='rotate-button' type='button'>&#8617</button>		<h2> Wednesday group </h2>
+		<h3>Meets on Wednesday</h3>
+		<div class="group-pic"><img src="images/groupPics/defaultGroup.png" alt="group picture"></div>
+		<div class="group-disc"><p></p></div>
+		<div class="group-members">
+			<h4>Group Officer</hr>
+		    <div class="officer-list">
+			    <a href="index.php?request=profile/2" data-link="profile/2">
+				    <img src="images/profilePics/default.jpg" alt="member picture">
+					<p>Henry</p>
+				</a>
+			</div>
+			<h4> Members </h4>
+			<div class="group-member">
+			<a href="index.php?request=profile/6" data-link="profile/6">
+			<img src="images/profilePics/default.jpg" alt="member picture"><p>Becky</p></a>
+			</div><div class="group-member">
+			<a href="index.php?request=profile/7" data-link="profile/7">
+			<img src="images/profilePics/default.jpg" alt="member picture"><p>Billie</p></a>
+			</div>		
+		</div>
+	</div>
+	<div id="back-pannel" class="rotateable ">
+		<button class='rotate-button' type='button'>&#8617</button>		<h2> Wednesday group </h2>
+		<h3>Meets on <select id="weekday-select">
+		<option value="4">Wednesday</option>
+		<option value='0'> Sunday </option>
+		<option value='1'> Monday </option>
+		<option value='2'> Tuesday </option>
+		<option value='4'> Thursday </option>
+		<option value='5'> Friday </option>
+		<option value='6'> Saturday </option></h3>
+		<div class="group-pic">
+		    <img src="images/groupPics/defaultGroup.png" alt="group picture">
+		<br>
+			<form enctype="multipart/form-data" action="" method="POST" id="upload-pic">
+				<input type="hidden" name="MAX_FILE_SIZE" value="300000" >
+				<input name="userpic" type="file"  accept=".jpg , .png , .gif" >
+				<input type="submit" id="submit-pic" value="Send picture" >
+			</form>	
+		</div>
+		<div class="group-disc"><p></p></div>
+		<div class="group-members">
+			<h4>Group Officer</hr>
+		    <div class="officer-list">
+			    <a href="index.php?request=profile/2" data-link="profile/2">
+				    <img src="images/profilePics/default.jpg" alt="member picture">
+					<p>Henry</p>
+				</a>
+			</div>
+			<h4> Members </h4>
+			<div class="group-member"><a href="index.php?request=profile/6" data-link="profile/6"><img src="images/profilePics/default.jpg" alt="member picture"><p>Becky</p></a></div><div class="group-member"><a href="index.php?request=profile/7" data-link="profile/7"><img src="images/profilePics/default.jpg" alt="member picture"><p>Billie</p></a></div>		</div>
+	</div>
+    
+	

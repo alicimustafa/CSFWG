@@ -39,11 +39,7 @@ if(isset($_REQUEST['request'])){
             }
             break;
         case "profile":
-            if($request_obj->valid_user){
-                $main_pannel = "htmlfrag/profile.php";
-            } else {
-                $main_pannel = "htmlfrag/unauthorize.php";
-            }
+            $main_pannel = "htmlfrag/profile.php";
             break;
         case "workshop":
             $main_pannel = "htmlfrag/workshop.php";

@@ -1,5 +1,5 @@
 <?php 
-include_once("/crt_functions.php");
+include_once("crt_functions.php");
 include_once("class/Members_table.php");
 include_once("class/Groups_list.php");
 $rank_types = array("Admin","Alumni","Member","Officer");
@@ -10,6 +10,7 @@ for the admin and officer there is additional functionality
 officer and admin will be able to assign and remove members from groups
 and they can add new members
 addmin will be able to add new groups and changed member ranks
+assign officers to the group. rename groups.
 */
 //this section changes effect based on if the person is officer or admin
 if($request_obj->account_priv == "Officer" or $request_obj->account_priv == "Admin"){ 
@@ -27,12 +28,14 @@ if($request_obj->account_priv == "Officer" or $request_obj->account_priv == "Adm
 		</form>
 	';
 	$reactivate_button = '<button type="button" id="open-reactivate">Reactivate member</button>';
+	$flip_button = "<button class='rotate-button' type='button'>&#8617</button>";
 
 } else {
     $drag_status = "";
     $remove_button = "";
 	$add_member_form = "";
 	$reactivate_button = "";
+	$flip_button = "";
 }
 if($request_obj->account_priv == "Admin"){
     $add_group_form = '
@@ -49,99 +52,70 @@ if($request_obj->account_priv == "Admin"){
 if(isset($request_obj->arg[0])){
 	switch ($request_obj->arg[0]){  //this checks what you want to effect and what action you want to use on this page
 		case "groupAssignment":  // this for adding or removing some one from a group
-		    if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Officer"){
+		    if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Officer"){//make sure some is allowed to make change
 				include("class/connect.php");
-				$group_name = test_input($_REQUEST['group_name']);
+				$group_id = test_input($_REQUEST['group_id']);
 				$member_id = test_input($_REQUEST['member_id']);
 				switch ($request_obj->action){
 					case "DELETE": // remove from group
 						$col_select = "
-							DELETE FROM group_member_list_tbl
-							WHERE group_name = :name
+							DELETE FROM group_member_list
+							WHERE group_id = :id
 							AND member_id = :member ";
 						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':name'=>$group_name, ':member'=>$member_id));
+						$stmt->execute(array(':id'=>$group_id, ':member'=>$member_id));
 						$col_select = "
-						    UPDATE group_tbl
-							SET group_officer_id = NULL,
-							group_officer_first_name = NULL,
-							group_officer_last_name = NULL
-							WHERE group_officer_id = :member
+						    UPDATE groups
+							SET group_officer = NULL
+							WHERE group_officer = :member
 						";
 						$stmt = $pdo->prepare($col_select);
 						$stmt->execute(array(':member'=>$member_id));
 						break;
 					case "POST": // add to group
 						$col_select = "
-							INSERT INTO group_member_list_tbl (member_id , group_name)
-							VALUES ( :member , :name)";
+							INSERT INTO group_member_list (member_id , group_id)
+							VALUES ( :member , :id)";
 						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':name'=>$group_name, ':member'=>$member_id));
+						$stmt->execute(array(':id'=>$group_id, ':member'=>$member_id));
 						break;
 				}
 			}
 		    break;
 		case "groupList": // this for adding groups, removeing groups or changeging group name
 		    if($request_obj->account_priv == "Admin"){
-				$group_name = test_input($_REQUEST['group_name']);
-				print_r($_REQUEST);
 				switch ($request_obj->action){
 					case "DELETE": 
+					    $group_id = test_input($_REQUEST['group_id']);
 						include("class/connect.php");
 						$col_select = "
-							DELETE FROM group_tbl
-							WHERE group_name = :name
+							DELETE FROM groups
+							WHERE group_id = :id
 						";
 						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':name'=> $group_name));
-						$col_select = "
-							DELETE FROM group_names_tbl
-							WHERE group_name = :name
-						";
-						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':name'=> $group_name));
+						$stmt->execute(array(':id'=> $group_id));
 						break;
 					case "POST":
-					echo "got the right area";
+					    $group_name = test_input($_REQUEST['new_name']);
 						include("class/connect.php");
 						$col_select = "
-							INSERT INTO group_names_tbl (group_name)
-							VALUES (:name)
-						";
-						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':name'=> $group_name));
-						$col_select = "
-						    INSERT INTO group_tbl (group_name)
-							VALUES (:name);
+						    INSERT INTO groups (group_name,weekday_id)
+							VALUES (:name, 1);
 						";
 						$stmt = $pdo->prepare($col_select);
 						$stmt->execute(array(':name'=> $group_name));
 						break;
 					case "PUT":
-					    echo "right area";
 						include("class/connect.php");
 						$new_name = test_input($_REQUEST['new_name']);
+					    $group_id = test_input($_REQUEST['group_id']);
 						$col_select = "
-							UPDATE group_member_list_tbl
+							UPDATE groups
 							SET group_name = :newname
-							WHERE group_name = :name
+							WHERE group_id = :id
 						";
 						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':newname'=>$new_name , ':name'=>$group_name));
-						$col_select = "
-							UPDATE group_names_tbl
-							SET group_name = :newname
-							WHERE group_name = :name
-						";
-						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':newname'=>$new_name , ':name'=>$group_name));
-						$col_select = "
-							UPDATE group_tbl
-							SET group_name = :newname
-							WHERE group_name = :name
-						";
-						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':newname'=>$new_name , ':name'=>$group_name));
+						$stmt->execute(array(':newname'=>$new_name , ':id'=>$group_id));
 						break;
 				}	
             }				
@@ -155,18 +129,32 @@ if(isset($request_obj->arg[0])){
 						$last_name = test_input($_REQUEST['last_name']);
 						$input_email = test_input($_REQUEST['email']);
 						$col_select = "
-							INSERT INTO members_tbl (member_first_nm , member_last_nm , member_email , member_rank)
-							VALUES (:fname , :lname , :email , 'Member')
+							INSERT INTO members (first_nm , last_nm , email , rank_id)
+							VALUES (:fname , :lname , :email , 3)
 						";
 						$stmt = $pdo->prepare($col_select);
 						$stmt->execute(array(':fname'=>$first_name , ':lname'=>$last_name , ':email'=>$input_email));
-						$inser_id = $pdo->lastInsertId();
+						$insert_id = $pdo->lastInsertId();
 						$col_select = "
-							INSERT INTO log_in_tbl (log_un , log_pw , member_id)
-							VALUES (:uname , '1234' , :memid )
+							INSERT INTO log_in (log_un , log_pw , member_id)
+							VALUES (:uname , 1234 , :memid )
 						";
 						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':uname'=>$input_email , 'memid'=>$inser_id));
+						$stmt->execute(array(':uname'=>$input_email , 'memid'=>$insert_id));
+						$col_select = "
+						    INSERT INTO member_profile (member_id)
+							VALUES ($insert_id);
+						";
+						$stmt = $pdo->query($col_select);
+						$col_select = "
+						    INSERT INTO member_dues (dues_paid, member_id)
+							VALUES (1, $insert_id)
+						";
+						$stmt = $pdo->query($col_select);
+						$direc_path = 'files/archive/member'.$insert_id;
+						if(!file_exists($direc_path)){
+							mkdir($direc_path , 0755);
+						}
 					}
 					break;
 			    case "PUT":
@@ -175,12 +163,20 @@ if(isset($request_obj->arg[0])){
 						$new_rank = test_input($_REQUEST['new_rank']);
 						$member_id = test_input($_REQUEST['mem_id']);
 						$col_select = "
-							UPDATE members_tbl
-							SET member_rank = :newrank
+							UPDATE members
+							SET rank_id = :newrank
 							WHERE member_id = :memid
 						";
 						$stmt = $pdo->prepare($col_select);
 						$stmt->execute(array(':newrank'=>$new_rank, ':memid'=>$member_id));
+						if($new_rank == 5){
+							$col_select = "
+							    DELETE FROM log_in
+								WHERE member_id = :memid
+							";
+							$stmt = $pdo->prepare($col_select);
+							$stmt->execute(array(':memid'=>$member_id));
+						}
 					}
 				    break;
 			}
@@ -192,16 +188,16 @@ if(isset($request_obj->arg[0])){
 					    include("class/connect.php");
 						$col_select = "
 						    SELECT
-							member_first_nm AS name,
-							member_last_nm AS lname,
+							first_nm AS fname,
+							last_nm AS lname,
 							member_id 
-							FROM members_tbl
-							WHERE member_rank = 'Inactive'
+							FROM members
+							WHERE rank_id = 5
 						";
 						$stmt = $pdo->query($col_select);
-						$reactivate_button = "<p>Inactive member list<select id='reactivate-select'>";
+						$reactivate_button = "<p>Inactive member list<select id='reactivate-select'><option> </option>";
 						while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
-							$reactivate_button .= "<option data-id='".$row['member_id']."' data-fn='".$row['name']."' data-ln='".$row['lname']."'>".$row['name']." ".$row['lname']."</option>";
+							$reactivate_button .= "<option data-id='".$row['member_id']."' data-fn='".$row['fname']."' data-ln='".$row['lname']."'>".$row['fname']." ".$row['lname']."</option>";
 						}
 						$reactivate_button .= '
 						    </select></p><br>
@@ -222,14 +218,14 @@ if(isset($request_obj->arg[0])){
 						$member_id = test_input($_REQUEST['member_id']);
 						include("class/connect.php");
 						$col_select ="
-						    UPDATE members_tbl
-							SET member_rank = 'Member'
+						    UPDATE members
+							SET rank_id = 3 , email = :email
 							WHERE member_id = :memid
 						";
 						$stmt = $pdo->prepare($col_select);
-						$stmt->execute(array(':memid'=>$member_id));
+						$stmt->execute(array(':email'=>$input_email, ':memid'=>$member_id));
 						$col_select ="
-							INSERT INTO log_in_tbl (log_un , log_pw , member_id)
+							INSERT INTO log_in (log_un , log_pw , member_id)
 							VALUES (:uname , '1234' , :memid )
 						";
 						$stmt = $pdo->prepare($col_select);
@@ -240,21 +236,16 @@ if(isset($request_obj->arg[0])){
 			break;
 		case "officerGroup":
 		    if($request_obj->account_priv == "Admin"){
-				$off_id = test_input($_REQUEST['id']);
-				$off_fn = test_input($_REQUEST['fn']);
-				$off_ln = test_input($_REQUEST['ln']);
-				$group = test_input($_REQUEST['group']);
+				$officer_id = test_input($_REQUEST['officer_id']);
+				$group_id = test_input($_REQUEST['group_id']);
 				include("class/connect.php");
 				$col_select ="
-				    UPDATE group_tbl
-					SET
-					group_officer_id = :id,
-					group_officer_first_name = :fn,
-					group_officer_last_name = :ln
-					WHERE group_name = :group
+				    UPDATE groups
+					SET group_officer = :id
+					WHERE group_id = :group
 				";
 				$stmt = $pdo->prepare($col_select);
-				$stmt->execute(array(':id'=>$off_id,':fn'=>$off_fn,':ln'=>$off_ln,':group'=>$group));
+				$stmt->execute(array(':id'=>$officer_id,':group'=>$group_id));
 			}
 			break;
 		default:
@@ -262,15 +253,15 @@ if(isset($request_obj->arg[0])){
 	}
 } 
 include("class/connect.php");
-$first_row = true;
 $col_select = "
     SELECT 
-    member_first_nm AS name,
-    member_last_nm AS lname,
-    member_rank AS rank,
+    members.first_nm AS name,
+    members.last_nm AS lname,
+    ranks.rank_name AS rank,
     member_id AS id
-    FROM members_tbl
-	WHERE member_rank IN ('Admin' , 'Officer' ,'Member' , 'Alumni')
+    FROM members
+    INNER JOIN ranks ON members.rank_id = ranks.rank_id
+	WHERE ranks.rank_name IN ('Admin' , 'Officer' ,'Member' , 'Alumni')
     ORDER BY FIELD(rank ,'Admin' , 'Officer' ,'Member' , 'Alumni'), name ASC
     ";
 $stmt = $pdo->query($col_select); //gets the list of members 
@@ -280,30 +271,28 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 }
 $col_select = "
     SELECT
-    members_tbl.member_first_nm AS name,
-    members_tbl.member_last_nm AS lname,
-    group_member_list_tbl.member_id AS member_id,
-    group_names_tbl.group_name AS grp_name,
-    group_tbl.group_officer_id AS offid,
-    group_tbl.group_officer_first_name AS offname,
-    group_tbl.group_officer_last_name AS offlname,
-    group_tbl.group_weekday AS weekday
-    FROM group_member_list_tbl
-    RIGHT OUTER JOIN group_names_tbl
-    ON group_names_tbl.group_name = group_member_list_tbl.group_name
-    LEFT OUTER JOIN members_tbl
-    ON members_tbl.member_id = group_member_list_tbl.member_id
-    LEFT OUTER JOIN group_tbl
-    ON group_member_list_tbl.group_name = group_tbl.group_name
-    ORDER BY grp_name, name";
+    members.first_nm AS fname,
+    members.last_nm AS lname,
+    group_member_list.member_id AS member_id,
+    groups.group_name AS grp_name,
+    groups.group_id AS grp_id,
+    groups.group_officer AS offid,
+    (SELECT first_nm FROM members WHERE member_id = offid) AS offname,
+    (SELECT last_nm FROM members WHERE member_id = offid) AS offlname
+    FROM group_member_list
+    LEFT OUTER JOIN members
+    ON members.member_id = group_member_list.member_id
+    RIGHT OUTER JOIN groups
+    ON group_member_list.group_id = groups.group_id
+    ORDER BY groups.weekday_id, fname";
 $stmt = $pdo->query($col_select); // this gets the list of groups and members
 $group_list = new Groups_list;
 while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 	$group_list->proces_row($row);
 }
 ?>
-<div id="front-members" class="rotateable <?php if($request_obj->back){echo "flipped";} ?> ">
-    <button class='rotate-button' type='button'>&#8617</button>
+<div id="front-pannel" class="rotateable <?php if($request_obj->back){echo "flipped";} ?> ">
+    <?php echo $flip_button ?>
 	<div class="member-section">
 	<div class="members-list">
 		<table>
@@ -323,8 +312,8 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 	</div>
 	</div>
 </div>
-<div id="back-members" class="rotateable <?php if($request_obj->back){echo "flipped";} ?>">
-    <button class='rotate-button' type='button'>&#8617</button>
+<div id="back-pannel" class="rotateable <?php if($request_obj->back){echo "flipped";} ?>">
+    <?php echo $flip_button ?>
 	<div class="member-section">
 	<div class="members-list">
 		<table>
@@ -349,5 +338,4 @@ while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 	<?php echo $add_group_form; ?>
 	</div>
 </div>
-
 
