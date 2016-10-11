@@ -1,5 +1,5 @@
 <?php 
-class Groups_list {
+class GroupsList {
 	/*
 	This class has 2 function one to generate a 3d array
 	using input from the querry the other formats and outputs

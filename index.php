@@ -3,13 +3,17 @@
 it will read the request send the proper page info
 if there no request it will just send the home page */
 include("crt_functions.php");
-include("class/Jwt_signature.php");
-include("class/Request_obj.php");
+function class_autoloader($class){
+	include 'class/' . $class . '.php';
+}
+spl_autoload_register('class_autoloader');
+date_default_timezone_set("America/Denver");
 /* this will create and request object that will hold 
 info used in the rest of the site */
-$request_obj = new Request_obj; 
-
-//fallowing will list navgation bar links displayed depends on loged and valid
+$request_obj = new RequestObject(); 
+$jwt_signature = new JwtSignature($request_obj->enc_key);
+$request_obj->checkCookie($jwt_signature);
+//fallowing will list navigation bar links displayed depends on loged and valid
 if($request_obj->valid_user){
     $nav_display = 'style="display:inline"';
 } else {
@@ -17,6 +21,7 @@ if($request_obj->valid_user){
 }
 if(isset($_REQUEST['request'])){
     $request_obj->read_url($_REQUEST['request']);
+    $request_obj->checkSyncToken();
     switch ($request_obj->end_point){
         case "home":
             $main_pannel = "htmlfrag/home.php";
@@ -53,15 +58,18 @@ if(isset($_REQUEST['request'])){
         case "logging":
             $main_pannel = "htmlfrag/logging.php";
             break;
+		case "calendar":
+		    $main_pannel = "htmlfrag/calendar.php";
+			break;
         default :
             $main_pannel = "htmlfrag/error.php";
     }
     if($request_obj->section){
-        include($main_pannel);
+        include $main_pannel;
     } else {
-        include("htmlfrag/shell.php");  
+        include "htmlfrag/shell.php";  
     } 
 } else { 
     $main_pannel = "htmlfrag/home.php";
-    include("htmlfrag/shell.php");
+    include "htmlfrag/shell.php";
 }

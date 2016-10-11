@@ -1,7 +1,10 @@
 <?php  
-$first_row = true;
 if(isset($request_obj->arg[0])){ //this section show only certain archive list
-	//
+	echo createArchiveSectionTable($request_obj);
+} else { // this sectin displays what shows all of the archive
+    echo createWholeArchiveTable($request_obj);
+}
+function createArchiveSectionTable($request_obj){
 	$up_array[':year'] = $request_obj->arg[0];
 	$up_array[':month'] = $request_obj->arg[1];
 	/*
@@ -51,8 +54,9 @@ if(isset($request_obj->arg[0])){ //this section show only certain archive list
 		echo "<h1>Archive for ungrouped members ".$up_array[':year']." ".$up_array[':month']."</h1>";
 	}
 	echo "<table><thead><tr><th>Author name</th><th>File discription</th><th>File</th></tr></thead>";
-	echo $table_body."</tbody></table>";
-} else { // this sectin displays what shows all of the archive
+	return $table_body."</tbody></table>";
+}
+function createWholeArchiveTable($request_obj){
 	$col_select = "
 		SELECT 
 		COUNT(archive.member_id) AS total,
@@ -68,6 +72,7 @@ if(isset($request_obj->arg[0])){ //this section show only certain archive list
 		ORDER BY DATE_FORMAT(archive.submit_date, '%Y,%m') DESC ,groups.weekday_id ASC	";
 	include("class/connect.php");
 	$stmt = $pdo->query($col_select);
+	$first_row = true;
 	while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 		/*
 		this will build the tables that hold the archive info
@@ -77,8 +82,9 @@ if(isset($request_obj->arg[0])){ //this section show only certain archive list
 			$row['group_name'] = "Ungrouped";
 		}
 		//table_data will hold info for each entry that is td and a element
-		$table_data = '<td><a href="index.php?request=archive/'.$row['arc_year'].'/'.$row['arc_month'].'/'.$row['group_id'].'" class="arc-link" 
-		               data-link="archive/'.$row['arc_year'].'/'.$row['arc_month'].'/'.$row['group_id'].'">'.$row['arc_month'].'('.$row['total'].')'.'</a></td>';
+		if($row['group_id']){$group_id = $row['group_id'];} else {$group_id = "Ungrouped";}
+		$table_data = '<td><a href="index.php?request=archive/'.$row['arc_year'].'/'.$row['arc_month'].'/'.$group_id.'" class="arc-link" 
+		               data-link="archive/'.$row['arc_year'].'/'.$row['arc_month'].'/'.$group_id.'">'.$row['arc_month'].'('.$row['total'].')'.'</a></td>';
 		if($first_row){
 			/*
 			this checks to see it the first row from the database
@@ -134,6 +140,6 @@ if(isset($request_obj->arg[0])){ //this section show only certain archive list
 	}
 	//this next section closes the final table and div
 	$curent_table_body .= $curent_row.'</tr>';
-	echo $year_section, $curent_table_header, "</tr></thead>", $curent_table_body, "</tbody></table></div>";
+	return $year_section. $curent_table_header. "</tr></thead>". $curent_table_body. "</tbody></table></div>";
 }
 ?>

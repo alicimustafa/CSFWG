@@ -1,47 +1,51 @@
 ﻿/* css style reset begin */
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed,
-figure, figcaption, footer, header, hgroup,
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-margin: 0;
-padding: 0;
-border: 0;
-font-size: 100%;
-font: inherit;
-vertical-align: baseline;
-}
-/* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure,
-footer, header, hgroup, menu, nav, section {
-display: block;
-}
-body {
-line-height: 1;
-}
-ol, ul {
-list-style: none;
-}
-blockquote, q {
-quotes: none;
-}
-blockquote:before, blockquote:after,
-q:before, q:after {
-content: '';
-content: none;
-}
-table {
-border-collapse: collapse;
-border-spacing: 0;
-}
+    /**
+    * Eric Meyer's Reset CSS v2.0 (http://meyerweb.com/eric/tools/css/reset/)
+    * http://cssreset.com
+    */
+    html, body, div, span, applet, object, iframe,
+    h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+    a, abbr, acronym, address, big, cite, code,
+    del, dfn, em, img, ins, kbd, q, s, samp,
+    small, strike, strong, sub, sup, tt, var,
+    b, u, i, center,
+    dl, dt, dd, ol, ul, li,
+    fieldset, form, label, legend,
+    table, caption, tbody, tfoot, thead, tr, th, td,
+    article, aside, canvas, details, embed,
+    figure, figcaption, footer, header, hgroup,
+    menu, nav, output, ruby, section, summary,
+    time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+    }
+    /* HTML5 display-role reset for older browsers */
+    article, aside, details, figcaption, figure,
+    footer, header, hgroup, menu, nav, section {
+    display: block;
+    }
+    body {
+    line-height: 1;
+    }
+    ol, ul {
+    list-style: none;
+    }
+    blockquote, q {
+    quotes: none;
+    }
+    blockquote:before, blockquote:after,
+    q:before, q:after {
+    content: '';
+    content: none;
+    }
+    table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    }
 /* reset end */
 fieldset {
     display: block;
@@ -71,7 +75,11 @@ body {
 #nav-bar {
     background-color:#000000;
     width:85em;
-    height:3em
+    height:3em;
+}
+#nav-bar ul {
+	float:left;
+	width:70em;
 }
 #nav-bar ul li {
     color:#FF0066;
@@ -81,6 +89,105 @@ body {
     margin:0 .5em 0 .5em;
 }
 /* nav barr end */
+
+/* calendar section style begin */
+#calendar-section {
+	float:left
+}
+#calendar-icon {
+	cursor:pointer
+}
+#mini-calendar-icon {
+	cursor:pointer
+}
+#calendar-pannel {
+	position:absolute;
+	width:60em;
+	height:30em;
+	border:1px #00FF00 solid;
+	background:#FFFFFF;
+	z-index:1
+}
+#calendar-pannel table {
+	clear:both;
+	width:60em;
+	height:28.5em
+} 
+.event-area {
+	width:8.5em;
+	height:4em;
+	overflow:auto
+}
+#calendar-pannel ul {
+	display:block
+}
+#year-month {
+	margin-left:25em;
+	font-size:1.5;
+	font-weight:bold
+}
+#left-arrow {
+	float:left;
+	color:#00FF00;
+	font-size:1.5em;
+	cursor:pointer
+}
+#right-arrow {
+	float:right;
+	color:#00FF00;
+	font-size:1.5em;
+	cursor:pointer
+}
+.this-month {
+	background: #ff0066
+}
+.this-month:hover {
+	background: #E36D9E
+}
+.not-month {
+	background: #6699ff
+}
+.event-area ul li{
+	font-size:.85em;
+	color:#000000;
+	cursor:pointer
+}
+#calendar-event {
+	position:absolute;
+	border:1px #00FF00 solid;
+	width:40em;
+	height:30em;
+	background:#FFFFFF;
+	z-index:2
+}
+#mini-calendar {
+	width:8em;
+	height:9em;
+	background:#FFFFFF;
+	position:absolute;
+	z-index:4
+}
+#mini-calendar td {
+	cursor:pointer
+}
+#year-month-mini {
+	margin-left:1em;
+	font-size:1em;
+	font-weight:bold
+}
+#left-arrow-mini {
+	float:left;
+	color:#00FF00;
+	font-size:1em;
+	cursor:pointer
+}
+#right-arrow-mini {
+	float:right;
+	color:#00FF00;
+	font-size:1em;
+	cursor:pointer
+}
+/* calendar section style end */
 
 /* logo style begin */
 #logo {
@@ -127,6 +234,9 @@ body {
 
 /* main pannel style begin */
 #main-pannel {
+    height:56em;
+    width:60em;
+    position:absolute
 }
 #inner-wrap {
     float:right;
@@ -140,24 +250,24 @@ body {
 	float:right;
 	clear:both;
 }
-#back-pannel , #front-pannel {
+.back-pannel , .front-pannel {
 	position:absolute;
 	-webkit-backface-visibility:hidden;
 	backface-visibility:hidden;
 	-webkit-transition: -webkit-transform 0.3s;
 	transition: transform 0.3s;
 	background: #FFFFFF;
-    width:60em;
+	width:100%;
 }
-#back-pannel {
+.back-pannel {
 	-webkit-transform:rotateY(180deg);
 	transform:rotateY(180deg)
 }
-#front-pannel.flipped {
+.front-pannel.flipped {
 	-webkit-transform:rotateY(180deg);
 	transform:rotateY(180deg)
 }
-#back-pannel.flipped {
+.back-pannel.flipped {
 	-webkit-transform:rotateY(0deg);
 	transform:rotateY(0deg)
 }
@@ -299,9 +409,9 @@ body {
 /* groups page style end */
 
 /* arhcive page style start */
-.
+
 /* archive page style end */
-#loading-pannel{
+#loading-pannel {
     background-image:url('../images/ajax-loader.gif');
     background-position:center;
     background-repeat:no-repeat;

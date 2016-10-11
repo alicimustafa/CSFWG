@@ -5,11 +5,18 @@
 <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
 <link rel="stylesheet" type="text/css" href="css/CSFWG.css" />
 <script src="javascript/CSFWG.js"></script>
-<title>Untitled 1</title>
+<title>CSFWG website</title>
 </head>
 
 <body>
 <div id="wrap">
+		<div id="calendar-section">
+		<img id="calendar-icon" src="images/calendar.png">
+	    <div id="calendar-pannel" class="closed-section">
+	    </div>
+		<div id="calendar-event" class="closed-section">
+		</div>
+		</div>
 	<div id="nav-bar">
 	    <ul>
             <li>
@@ -34,9 +41,6 @@
 	            <a href="index.php?request=members" class="nav-link" <?php echo $nav_display ?> data-link="members">Members</a>
 	        </li>
 	    </ul>
-	    <div id="calendar-pannel">
-	    Calender
-	    </div>
 	</div>
     <div id="logo">
         <img src="images/CSFWG2013.jpg" width="200" height="113" alt="logo" />

@@ -1,16 +1,16 @@
 <?php 
-class Members_table {
+class MembersTable {
 	/*this class will hold and generate the rows
 	for the members table it will generate 3 tables
 	one for members one for officers and one for admin
 	  */
-	public $member_rows = "";
-	public $officer_rows = "";
-	public $admin_rows = "";
+	private $member_rows = "";
+	private $officer_rows = "";
+	private $admin_rows = "";
 	private $rank_types = array("1"=>"Admin","2"=>"Officer","3"=>"Member","4"=>"Alumni","5"=>"Inactive");
 	private $drag_status = 'draggable="true" class="drag"';
 	public function proces_row($row){
-		$this->member_rows .= "<tr><td>".$row['name']." ".$row['lname']."</td><td>".$row['rank']."</td></tr>";
+		$this->member_rows .= "<tr><td><a href='index.php?request=profile/".$row['id']."'> ".$row['name']." ".$row['lname']."</a></td><td>".$row['rank'].",</td></tr>";
 		$this->officer_rows .= "<tr><td ".$this->drag_status." data-member='".$row['id']."' >".$row['name']." ".$row['lname']."</td><td>".$row['rank']."</td></tr>";
 		$this->admin_rows .= "<tr><td ".$this->drag_status." data-member='".$row['id']."' >".$row['name']." ".$row['lname']."</td><td>";
 		$this->admin_rows .= "<select data-member='".$row['id']."'class='rank-select'>"."<option value='".$row['rank']."'>".$row['rank']."</option>";
