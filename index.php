@@ -22,6 +22,7 @@ if($request_obj->valid_user){
 if(isset($_REQUEST['request'])){
     $request_obj->read_url($_REQUEST['request']);
     $request_obj->checkSyncToken();
+    //print_r($request_obj);
     switch ($request_obj->end_point){
         case "home":
             $main_pannel = "htmlfrag/home.php";

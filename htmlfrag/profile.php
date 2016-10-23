@@ -24,6 +24,7 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 	if will diplay proper info on the back pannel
 	 this includes officers and the member that owns the profile
 	*/
+	print_r($_FILES);
 	if(isset($request_obj->arg[1])){ 
 		if($request_obj->arg[1] == "updateProfile"){updateMemberProfile($request_obj);}
 		
@@ -220,13 +221,13 @@ function updateUserPassword($request_obj, $error){
 	}
 }
 function updateMemberProfile($request_obj){
-	$up_array[':address'] = test_input($_REQUEST['address']);
-	$up_array[':city'] = test_input($_REQUEST['city']);
-	$up_array[':state'] = test_input($_REQUEST['state']);
-	$up_array[':zip'] = test_input($_REQUEST['zip']);
-	$up_array[':privacy'] = test_input($_REQUEST['privacy']);
+	$up_array[':address'] = $_REQUEST['address'];
+	$up_array[':city'] = $_REQUEST['city'];
+	$up_array[':state'] = $_REQUEST['state'];
+	$up_array[':zip'] = $_REQUEST['zip'];
+	$up_array[':privacy'] = $_REQUEST['privacy'];
 	$up_array[':id'] = $request_obj->arg[0];
-	$up_array[':phone'] = test_input($_REQUEST['phone']);
+	$up_array[':phone'] = $_REQUEST['phone'];
 	include("class/connect.php");
 	$col_input = "
 		UPDATE member_profile
@@ -343,17 +344,17 @@ function uploadMemberSubmitions($request_obj){
 			";
 			$up_array[':path'] = $file_path;
 			$up_array[':id'] = $request_obj->arg[0];
-			$up_array[':disc'] = test_input($_REQUEST['file_disc']);
+			$up_array[':disc'] = $_REQUEST['file_disc'];
 			$stmt = $pdo->prepare($col_input);
 			$stmt->execute($up_array);
 		}
-	}
+	} 
 }?>
 
 <div class="rotateable front-pannel <?php if($request_obj->back){echo "flipped";} ?> ">
     <?php echo $flip_button ?>
 	<h2> <?php echo $welcome; ?> </h2>
-	<div class="profile-pic"><img src="<?php echo $pic_path; ?>" alt="profle picture"></div>
+	<div class="profile-pic"><img src="<?php echo $request_obj->full_url.$pic_path; ?>" alt="profle picture"></div>
 	<div class="profile-qte">
 	    <p><?php echo $row['member_qt'] ?></p>
 	</div>
@@ -365,7 +366,7 @@ function uploadMemberSubmitions($request_obj){
 <div class="rotateable back-pannel <?php if($request_obj->back){echo "flipped";} ?>">
     <?php echo $flip_button ?>
 	<h2> <?php echo $welcome; ?> </h2>
-	<div class="profile-pic"><img src="<?php echo $pic_path; ?>" alt="profile picture">
+	<div class="profile-pic"><img src="<?php echo $request_obj->full_url.$pic_path; ?>" alt="profile picture">
 		<form enctype="multipart/form-data" action="" method="POST" id="upload-pic">
 		    <?php echo $picture_form; ?>
 		</form>	

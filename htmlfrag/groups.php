@@ -45,13 +45,13 @@ if(isset($request_obj->arg[0])){// checks to see if you are looking at a individ
 		<?php echo $flip_button ?>
 		<h2> <?php echo $row['group_name']; ?> </h2>
 		<h3><?php echo "Meets on ",$row['weekday']; ?></h3>
-		<div class="group-pic"><img src="<?php echo $img_src ?>" alt="group picture"></div>
+		<div class="group-pic"><img src="<?php echo $request_obj->full_url.$img_src ?>" alt="group picture"></div>
 		<div class="group-disc"><p><?php echo $row['group_description'] ?></p></div>
 		<div class="group-members">
 			<h4>Group Officer</h4>
 		    <div class="officer-list">
-			    <a href="index.php?request=profile/<?php echo $row['group_officer']; ?>" data-link="profile/<?php echo $row['group_officer']; ?>">
-				    <img src="<?php echo $officer_pic; ?>" alt="member picture">
+			    <a href="/profile/<?php echo $row['group_officer']; ?>" data-link="profile/<?php echo $row['group_officer']; ?>">
+				    <img src="<?php echo $request_obj->full_url.$officer_pic; ?>" alt="member picture">
 					<p><?php echo $officer_name; ?></p>
 				</a>
 			</div>
@@ -70,7 +70,7 @@ if(isset($request_obj->arg[0])){// checks to see if you are looking at a individ
 		}
 		echo "</select>";
 		?></h3>
-		<div class="group-pic"><img src="<?php echo $img_src ?>" alt="group picture">
+		<div class="group-pic"><img src="<?php echo $request_obj->full_url.$img_src ?>" alt="group picture">
 		<form enctype="multipart/form-data" action="" method="POST" id="upload-pic">
 		    <?php echo $picture_form; ?>
 		</form>	
@@ -86,8 +86,8 @@ if(isset($request_obj->arg[0])){// checks to see if you are looking at a individ
 		<div class="group-members">
 			<h4>Group Officer</h4>
 		    <div class="officer-list">
-			    <a href="index.php?request=profile/<?php echo $row['group_officer']; ?>" data-link="profile/<?php echo $row['group_officer']; ?>">
-				    <img src="<?php echo $officer_pic; ?>" alt="member picture">
+			    <a href="/profile/<?php echo $row['group_officer']; ?>" data-link="profile/<?php echo $row['group_officer']; ?>">
+				    <img src="<?php echo $request_obj->full_url.$officer_pic; ?>" alt="member picture">
 					<p><?php echo $officer_name; ?></p>
 				</a>
 			</div>
@@ -155,8 +155,8 @@ function createGroupGrid($request_obj, $group_officer){
 		} else {
 			$member_pic = "images/profilePics/default.jpg";
 		}
-		$group_member .= '<div class="group-member"><a href="index.php?request=profile/'.$group_row['member_id'].'" data-link="profile/'.$group_row['member_id'].'">';
-	    $group_member .= '<img src="'.$member_pic.'" alt="member picture"><p>'.$group_row['first_nm'].'</p></a></div>';
+		$group_member .= '<div class="group-member"><a href="/profile/'.$group_row['member_id'].'" data-link="profile/'.$group_row['member_id'].'">';
+	    $group_member .= '<img src="'.$request_obj->full_url.$member_pic.'" alt="member picture"><p>'.$group_row['first_nm'].'</p></a></div>';
 	}
 	$return['officer_name'] = $officer_name;
 	$return['group_member'] = $group_member;
@@ -203,11 +203,11 @@ function displayAllGroups($request_obj){
 	$group_display = "";
 	while($row =$stmt->fetch(PDO::FETCH_ASSOC)){
 		if($row['group_pic']){
-			$img_src = $row['group_pic'];
+			$img_src = $request_obj->full_url.$row['group_pic'];
 		} else {
-			$img_src = "images/groupPics/defaultGroup.png";
+			$img_src = $request_obj->full_url."images/groupPics/defaultGroup.png";
 		}
-		$group_display .= '<div class="group-div"><a class="group-link" href="index.php?request=groups/'.$row['group_id'].'" data-link="groups/'.$row['group_id'].'">';
+		$group_display .= '<div class="group-div"><a class="group-link" href="/groups/'.$row['group_id'].'" data-link="groups/'.$row['group_id'].'">';
 		$group_display .= "<img src='$img_src' alt='group picture'>";
 		$group_display .= "<p>".$row['group_name']." meets on ".$row['weekday']."</p>";
 		$group_display .= "<p>Led by ".$row['first_nm']."</p>";

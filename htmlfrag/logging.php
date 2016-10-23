@@ -34,7 +34,7 @@ switch($request_obj->action){
 					  $request_obj->user_id = $row['member_id'];
 					  $request_obj->account_priv = $row['rank'];
 					  $request_obj->sync_token = $sync_token;
-					  setcookie('jwt',$jwt_cookie);
+					  setcookie('jwt',$jwt_cookie, 0 ,"/");
 				  } else {
 					  $log_err = $err_mess;
 				  }
@@ -44,7 +44,7 @@ switch($request_obj->action){
 		}
 		break;
 	case "DELETE":
-		setcookie("jwt", "", time() - 3600);
+		setcookie("jwt", "", time() - 3600, "/");
 		$request_obj->valid_user = false;
 		break;
 	case "GET":
@@ -86,7 +86,7 @@ if($request_obj->valid_user){
     $logging_value = "loggoff";
     $submit_val = "Logg Off";
     $form_field = "";
-    echo "<p>Hello <a href='index.php?request=profile/".$request_obj->user_id."' id='profile-log' data-link='profile/".$request_obj->user_id."'>".$request_obj->user_name."</a></p>";
+    echo "<p>Hello <a href='/profile/".$request_obj->user_id."' id='profile-log' data-link='profile/".$request_obj->user_id."'>".$request_obj->user_name."</a></p>";
 }
 echo $log_err;
 ?>

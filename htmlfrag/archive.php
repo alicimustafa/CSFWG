@@ -46,7 +46,7 @@ function createArchiveSectionTable($request_obj){
 	$stmt->execute($up_array);
 	$table_body = "<tbody>";
 	while($row = $stmt->fetch(PDO::FETCH_ASSOC)){//build the table body
-		$table_body .= '<tr><td>'.$row['first_nm'].'</td><td>'.$row['archive_disc'].'</td><td><a href="'.$row['archive_path'].'" target="_blank"><img src="images/pdficon.png"</a></td></tr>';
+		$table_body .= '<tr><td>'.$row['first_nm'].'</td><td>'.$row['archive_disc'].'</td><td><a href="'.$request_obj->full_url.$row['archive_path'].'" target="_blank"><img src="'.$request_obj->full_url.'images/pdficon.png"</a></td></tr>';
 	}
 	if(isset($row['group_name'])){// changes the page intro based on group or ungrouped
 		echo "<h1>Archive for ".$row['group_name']." ".$up_array[':year']." ".$up_array[':month']."</h1>";
@@ -83,7 +83,7 @@ function createWholeArchiveTable($request_obj){
 		}
 		//table_data will hold info for each entry that is td and a element
 		if($row['group_id']){$group_id = $row['group_id'];} else {$group_id = "Ungrouped";}
-		$table_data = '<td><a href="index.php?request=archive/'.$row['arc_year'].'/'.$row['arc_month'].'/'.$group_id.'" class="arc-link" 
+		$table_data = '<td><a href="/archive/'.$row['arc_year'].'/'.$row['arc_month'].'/'.$group_id.'" class="arc-link" 
 		               data-link="archive/'.$row['arc_year'].'/'.$row['arc_month'].'/'.$group_id.'">'.$row['arc_month'].'('.$row['total'].')'.'</a></td>';
 		if($first_row){
 			/*

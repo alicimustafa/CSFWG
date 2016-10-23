@@ -6,6 +6,7 @@ determine if only section of a page or a whole page and if front pannel or back
 checks to see if the user has a valid token and if valid sets the user name and account type
 */   
 class RequestObject {
+    public $full_url = "http://csfwg:8080/";
     public $valid_user = false;  
     public $user_name = ""; 
 	public $user_id = "";

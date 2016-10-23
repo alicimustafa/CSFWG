@@ -142,7 +142,7 @@ var myaCSFWG = function(){
 		callback once the request returns
 		*/
 		var xhr = new XMLHttpRequest();
-		if(params.method != "GET"){params.data += "&sync_token="+document.getElementById("sync-token").value;}
+		if(params.method != "GET"){params.url += "?sync_token="+document.getElementById("sync-token").value;}
 		xhr.onload = function() {
 			if(xhr.status == 200 && xhr.responseText != null){
 				callBack(true, xhr.responseText);
@@ -151,16 +151,16 @@ var myaCSFWG = function(){
 			} 
 		}
 		xhr.open(params.method, params.url, true);
-		xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		if(params.setHeader){xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");}
 		xhr.send(params.data);
 	}
 /* utility end */
 
 	// fallowing hold varius variables used in throughout the website
 	var nav_links = document.getElementsByClassName("nav-link");
-	var push_link = "index.php?request=";
-	var url_link = "index.php?request=section/";
-	var state_obj = {page: "home"};
+	var push_link = "/";
+	var url_link = "/section/";
+	var state_obj = {page: "/home"};
 
 	function calendarClickHandler(ev){
 		if(ev.target.id == "left-arrow" || ev.target.id == "right-arrow"){changeCalendarMonth(ev);}
@@ -204,6 +204,7 @@ var myaCSFWG = function(){
 		if(ev.target.classList.contains("remove-but")){removeMemberGroup(ev);}
 		if(ev.target.classList.contains("group-remove")){removeGroup(ev);}
 		if(ev.target.classList.contains("group-name")){changeGroupName(ev);}
+		if(ev.target.classList.contains("nav-link")){navigateLink(ev);}
 		if(ev.target.id == "open-reactivate"){openReactivateForm(ev);}
 	}
 	
@@ -236,7 +237,7 @@ var myaCSFWG = function(){
 		if(ev.target.id == "upload-pic"){memberPictureUpload(ev);}
 		if(ev.target.id == "upload-file"){uploalSubmitionFile(ev);}
 		if(ev.target.id == "change-password"){changeUserPassword(ev);}
-		if(ev.target.id == "change-email"){console.log("right sres"); changeUserEmail(ev);}
+		if(ev.target.id == "change-email"){changeUserEmail(ev);}
 		if(ev.target.id == "personal-quote-form"){updatePersonalQuote(ev);}
 		//members page
 		if(ev.target.id == "add-member"){addNewMember(ev);}
@@ -283,6 +284,7 @@ var myaCSFWG = function(){
 			params.method = "GET";
 			params.url =  url_link+"calendar/displayMonth";
 			params.data = null;
+			params.setHeader = false;
 			AJAXRequest(params, calendarResponse);
 		}
 	}
@@ -311,6 +313,7 @@ var myaCSFWG = function(){
 		params.method = "GET";
 		params.url =  url_link+"calendar/changeMonth/"+link_year+"/"+link_month;
 		params.data = null;
+		params.setHeader = false;
 		AJAXRequest(params, calendarResponse);
 	}
 	function calendarResponse(response_ok, response_text){
@@ -413,6 +416,7 @@ var myaCSFWG = function(){
 		params.method = "GET";
 		params.url = url_link+"calendar/eventDay/"+link_year+"/"+link_month+"/"+link_day+"/"+event_id;
 		params.data = null;
+		params.setHeader = false;
 		AJAXRequest(params, calendarEventResponse);
 	}
 	function createOrUpdateEvent(ev){
@@ -450,8 +454,6 @@ var myaCSFWG = function(){
 		data_object.event_type = null;
 		params.url = url_link+"calendar/eventDay/"+year+"/"+month+"/"+day;
 		params.data = createParam(data_object);
-		console.log(data_object);
-		console.log(params);
 		AJAXRequest(params, calendarResponse);
 	}
 	function deleteEvent(ev){
@@ -462,7 +464,7 @@ var myaCSFWG = function(){
 		params.method = "DELETE";
 		params.url = url_link+"calendar/eventDay/"+year+"/"+month+"/"+day;
 		params.data = "event_id="+document.getElementById("event-id").value;
-		console.log(params);
+		params.setHeader = true;
 		AJAXRequest(params, calendarResponse);
 	}
 	function calendarEventResponse(response_ok, response_text){
@@ -499,6 +501,7 @@ var myaCSFWG = function(){
 		params.method = "GET";
 		params.url =  url_link+state_obj.page;
 		params.data = null;
+		params.setHeader = false;
 		AJAXRequest(params, navigationResponse);
     };
 	function navigationResponse(response_ok, response_text){
@@ -524,6 +527,7 @@ var myaCSFWG = function(){
 			params.method = "DELETE";
 			params.url = url_link + "logging";
 			params.data = null;
+			params.setHeader = false;
 			AJAXRequest(params, loggoffResponse);
         } else if(type_log == "loggon"){
             document.getElementById("log-submit").disabled = true; // disables the submit till response from server
@@ -533,19 +537,21 @@ var myaCSFWG = function(){
 			params.method = "POST";
 			params.url = url_link + "logging";
 			params.data = createParam(data_object);
+			params.setHeader = true;
 			if(params.password == "1234"){window.alert("you are using the default password please change it on your profile");}
 			AJAXRequest(params, loggonResponse);
 	    }   
     };
 	function resetKey(ev){
 		var confirm_reset = window.confirm("Are you sure you want to reset encryption key");
-		console.log(confirm_reset);
-		if(confirm_reset);
-		var params = {};
-		params.method = "PUT";
-		params.url = url_link + "logging";
-		params.data = null;
-		AJAXRequest(params, loggoffResponse);
+		if(confirm_reset){
+			var params = {};
+			params.method = "PUT";
+			params.url = url_link + "logging";
+			params.data = null;
+			params.setHeader = false;
+			AJAXRequest(params, loggoffResponse);
+		}
 	}
 	function loggoffResponse(response_ok, response_text){
 		if(response_ok){
@@ -576,6 +582,7 @@ var myaCSFWG = function(){
 		params.method = "GET";
 		params.url = url_link+state_obj.page;
 		params.data = null;
+		params.setHeader = false;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	
@@ -631,6 +638,7 @@ var myaCSFWG = function(){
 				params.url = url_link+"back/members/groupAssignment";
 				params.data = createParam(data_object);
 				toggleLoadingGif(true);
+				params.setHeader = true;
 				AJAXRequest(params, main_pannelResponse);
 			} 
 		}
@@ -657,6 +665,7 @@ var myaCSFWG = function(){
 		params.method = "DELETE";
 		params.url = url_link+"back/members/groupAssignment";
 		params.data = createParam(data_object);
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	};
 	function addNewMember(ev){ //hadler for adding a brand new member
@@ -670,6 +679,7 @@ var myaCSFWG = function(){
 		params.method = "POST";
 		params.url = url_link+"back/members/memberList";
 		params.data = createParam(data_object);
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	};
 	function changeMemberRank(ev){ // changing rank of members
@@ -690,6 +700,7 @@ var myaCSFWG = function(){
 		params.method = "POST";
 		params.url = url_link+"back/members/groupList";
 		params.data = "new_name="+group_name;
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function removeGroup(ev){ // removing a group
@@ -705,6 +716,7 @@ var myaCSFWG = function(){
 			params.method = "DELETE";
 			params.url = url_link+"back/members/groupList";
 		    params.data = "group_id="+group_id;
+			params.setHeader = true;
 			AJAXRequest(params, main_pannelResponse);
 		}
 	}
@@ -717,6 +729,7 @@ var myaCSFWG = function(){
 		params.method = "PUT";
 		params.url = url_link+"back/members/groupList";
 		params.data = createParam(data_object);
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function openReactivateForm(ev){ //opening the reactivate form
@@ -725,6 +738,7 @@ var myaCSFWG = function(){
 		params.method = "GET";
 		params.url = url_link+"back/members/reactivate";
 		params.data = null;
+		params.setHeader = false;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function selectMemberReactivate(ev){ // used to fill out the member info onto the form
@@ -743,6 +757,7 @@ var myaCSFWG = function(){
 		params.method = "PUT";
 		params.url = url_link+"back/members/reactivate";
 		params.data = createParam(data_object);
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function changeGroupOfficer(ev){//changing the officer for group
@@ -754,6 +769,7 @@ var myaCSFWG = function(){
 		params.method = "PUT";
 		params.url = url_link+"back/members/officerGroup";
 		params.data= createParam(data_object);
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	/* -------- event handlers for the members page end ------*/
@@ -781,8 +797,9 @@ var myaCSFWG = function(){
 		toggleLoadingGif(true);
 		var params = {};
 		params.method = "PUT";
-		params.url = url_link+"back/"+state_obj.page+"/updateQuote";
+		params.url = url_link+"back"+state_obj.page+"/updateQuote";
 		params.data = "personal_qt="+document.getElementById("personal-quote").value;
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function memberProfileUpdate(ev){
@@ -799,7 +816,7 @@ var myaCSFWG = function(){
 		data_object.phone = document.getElementById("update-phone").value;
 		data_object.privacy = document.getElementById("update-privacy").value;
 		params.method = "PUT";
-		params.url = url_link+"back/"+state_obj.page+"/updateProfile";
+		params.url = url_link+"back"+state_obj.page+"/updateProfile";
 		params.data = createParam(data_object);
 		AJAXRequest(params, main_pannelResponse);
 	}
@@ -828,7 +845,8 @@ var myaCSFWG = function(){
 			params.data = null;
 		}
 		params.method = "PUT";
-		params.url = url_link+"back/"+state_obj.page+"/updatePass";
+		params.url = url_link+"back"+state_obj.page+"/updatePass";
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function checkValidEmail(ev){
@@ -852,8 +870,9 @@ var myaCSFWG = function(){
 		toggleLoadingGif(true);
 		var params = {};
 		params.method = "PUT";
-		params.url = url_link+"back/"+state_obj.page+"/updateEmail";
+		params.url = url_link+"back"+state_obj.page+"/updateEmail";
 		params.data = "new_email="+document.getElementById("new-email").value;
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function main_pannelResponse(response_ok, response_text){
@@ -874,10 +893,10 @@ var myaCSFWG = function(){
 		var params = {};
         document.getElementById("submit-pic").disabled = true; // disables the submit till response from server
 		params.method = "POST";
-		params.url = url_link+"back/"+state_obj.page+"/uploadPic";
+		params.url = url_link+"back"+state_obj.page+"/uploadPic";
 		params.data = new FormData(ev.target);
+		params.setHeader = false;
 		AJAXRequest(params, pictureUploadResponse);
-		var xhr = new XMLHttpRequest();
 	}
 	function pictureUploadResponse(response_ok, response_text){
 		if(response_ok){
@@ -898,8 +917,9 @@ var myaCSFWG = function(){
 		document.getElementById("submit-file").disabled = true;
 		var params = {};
 		params.method = "POST";
-		params.url_link+"back/"+state_obj.page+"/submitionUpload";
+		params.url = url_link+"back"+state_obj.page+"/submitionUpload";
 		params.data = new FormData(ev.target);
+		params.setHeader = false;
 		AJAXRequest(params, uploadFileResponse);
 		var xhr = new XMLHttpRequest();
 	}
@@ -921,7 +941,7 @@ var myaCSFWG = function(){
 		params.method = "PUT";
 		params.url = url_link+"back/"+state_obj.page+"/updateGroupWeekday";
 		params.data = "weekday="+ev.target.value;
-		console.log(params);
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	function updateGroupDiscription(ev){ //updating the group discription using ajax
@@ -930,6 +950,7 @@ var myaCSFWG = function(){
 		params.method = "PUT";
 		params.url = url_link+"back/"+state_obj.page+"/updateDisc";
 		params.data = "discription="+document.getElementById("disc-field").value;
+		params.setHeader = true;
 		AJAXRequest(params, main_pannelResponse);
 	}
 	/* --------event heanler for the group page end -----------*/
@@ -971,13 +992,12 @@ var myaCSFWG = function(){
 		button works on the browser
 		*/
 		start: function(){
-			var url_info = location.search;
-			if(url_info == ""){
-				var repl_link = push_link+"home";
+			var url_info = location.pathname;
+			if(url_info == "/"){
+				var repl_link = "home";
 			} else {
-				var number = url_info.search("=");
-				state_obj.page = url_info.substr(number+1);
-				var repl_link = push_link+state_obj.page;
+				state_obj.page = url_info;
+				var repl_link = state_obj.page;
 			}
 	        for (var i=0; i < nav_links.length; i++){
                 nav_links[i].addEventListener('click', navigateLink, false);

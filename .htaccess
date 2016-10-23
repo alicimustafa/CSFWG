@@ -1,8 +1,4 @@
-<IfModule mod_rewrite.c>
-RewriteEngine on
-RewriteBase /CSFWG
-
-RewriteCond %{SCRIPT_FILENAME} !-d
-RewriteCond %{SCRIPT_FILENAME} !-f
-RewriteRule (.*)$ index.php?request=$1 [QSA,NC,L]
-</IfModule>
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?request=$1 [QSA,NC,L]
