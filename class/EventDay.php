@@ -35,10 +35,15 @@ class EventDay
 		}
 	}
 	
-	public function displayEvent(){
+	public function displayEvent($display_back = true){
 		$option = $this->createRepeatOptions();
+        if($display_back = true){
+            $title = '<a href="/event/'.$this->event_id.'" class="nav-link" data-link="event/'.$this->event_id.'">'.$this->event_title.'</a>';
+        } else {
+            $title = $this->title;
+        }
 		$front_pannel = '
-		    <h3>Event title:'.$this->event_title.'</h3>
+		    <h3>Event title:'.$title.'</h3>
 			<p>Event starts on: '.$this->event_start_month.'-'.$this->event_start_day.'-'.$this->event_start_year.'  Event ends on: '.$this->event_end_month.'-'.$this->event_end_day.'-'.$this->event_end_year.' </p>
 			<p>Event repeats:'.$option[$this->event_repeat_type].' </p>
 			<p>Event dispription:</p>
@@ -46,7 +51,7 @@ class EventDay
 			<br>
 			<button type="button" class="exit-event-day">Close this window</button>
 		';
-		if($this->account == "Officer" or $this->account == "Admin"){
+		if(($this->account == "Officer" or $this->account == "Admin") and $display_back === true){
 			$pannels = '
 			    <div  class="rotateable front-pannel">
                     <button class="rotate-button" type="button">&#8617</button>

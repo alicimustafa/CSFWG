@@ -40,13 +40,16 @@
 	        <li>
 	            <a href="/members" class="nav-link" <?php echo $nav_display ?> data-link="members">Members</a>
 	        </li>
+            <li>
+                <a href="/admin" class="nav-link" <?php echo $admin_display ?> data-link="admin">Admin page</a>
+            </li>
 	    </ul>
 	</div>
     <div id="logo">
         <img src="<?php echo $request_obj->full_url ?>images/CSFWG2013.jpg" width="200" height="113" alt="logo" />
     </div>
     <div id="right-pannel">
-        some stuff here for the right pannel
+        <?php include "htmlfrag/right_pannel.php"; ?>
     </div>
     <div id="inner-wrap">
     <div id="loading-pannel" style="display:none"></div>

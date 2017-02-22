@@ -4,7 +4,6 @@ this file creates and displays member profile
 it will also give sertan member ability to modify
 this info
 */
-include_once("crt_functions.php");
 // default for error
 $error['password']="";
 $error['verify']="";
@@ -24,7 +23,6 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 	if will diplay proper info on the back pannel
 	 this includes officers and the member that owns the profile
 	*/
-	print_r($_FILES);
 	if(isset($request_obj->arg[1])){ 
 		if($request_obj->arg[1] == "updateProfile"){updateMemberProfile($request_obj);}
 		

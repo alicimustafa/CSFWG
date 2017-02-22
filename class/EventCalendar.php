@@ -2,10 +2,11 @@
 class EventCalendar 
 {
 	const CALENDAR_SIZE = 42;
-	private $this_month_number_of_days, $last_month_number_of_days, $first_day_of_this_month;
-	private $calendar_array = array(); // array that hold the information for the calander days
-	private $this_month, $this_year;  // these hold month and year of calander being displayed
+    public $this_month_number_of_days, $last_month_number_of_days, $first_day_of_this_month;
+	public $calendar_array = array(); // array that hold the information for the calander days
+	public $this_month, $this_year;  // these hold month and year of calander being displayed
 	private $calendar_header;
+    private $request_obj;
 	private $account; //privilage level of the user
 	
 	public function __construct($request_obj){
@@ -19,18 +20,10 @@ class EventCalendar
 		on each day
 		*/
 		$this->account = $request_obj->account_priv;
-		$this->this_month = $request_obj->arg[2];
-		$this->this_year = $request_obj->arg[1];
-		$this->this_month_number_of_days = date('t', mktime(1,1,1,$this->this_month,1,$this->this_year));
-		if($this->this_month == 1 ){
-			$last_month = 12;
-			$last_year = $request_obj->arg[2]-1;
-		} else {
-			$last_month = $request_obj->arg[1]-1;
-			$last_year = $request_obj->arg[2];
-		}
-		$this->last_month_number_of_days = date('t', mktime(1,1,1,$last_month,1,$last_year));
-		$this->first_day_of_this_month = date('w', mktime(1,1,1,$this->this_month,1,$this->this_year));
+		$this->this_month = $request_obj->arg[2] ?? date("n");
+		$this->this_year = $request_obj->arg[1] ?? date("Y");
+        $this->request_obj = $request_obj;
+        $this->fillDaysVariables();
 		$this->fillCalendar();
 		$this->getEventsFromDB($request_obj);
 		$this->calendar_header = '
@@ -41,6 +34,19 @@ class EventCalendar
 			</div>
 		';
 	}
+    
+    private function fillDaysVariables(){
+		$this->this_month_number_of_days = date('t', mktime(1,1,1,$this->this_month,1,$this->this_year));
+		if($this->this_month == 1 ){
+			$last_month = 12;
+			$last_year = $this->this_year - 1;//request_obj->arg[1]-1;
+		} else {
+			$last_month = $this->this_month - 1;//$request_obj->arg[2]-1;
+			$last_year = $this->this_year;//$request_obj->arg[1];
+		}
+		$this->last_month_number_of_days = date('t', mktime(1,1,1,$last_month,1,$last_year));
+		$this->first_day_of_this_month = date('w', mktime(1,1,1,$this->this_month,1,$this->this_year));
+    }
 	
 	private function fillCalendar(){
 		if($this->first_day_of_this_month == 0){
@@ -101,7 +107,7 @@ class EventCalendar
 		call a function to put them on to the calendar array 
 		*/
 		$col_select ="
-			SELECT 
+            SELECT 
 			event_id,
 			event_title,
 			EXTRACT(YEAR FROM event_date) AS year,
@@ -114,11 +120,23 @@ class EventCalendar
 			FROM events
 			WHERE 
 			(repeat_type = 0 AND EXTRACT(YEAR FROM event_date) = :year AND EXTRACT(MONTH FROM event_date) = :month) OR 
-			(repeat_type = 4 AND EXTRACT(MONTH FROM event_date) = :month AND 
-			 (EXTRACT(YEAR FROM event_date) <= :year AND (EXTRACT(YEAR FROM repeat_end) >= :year OR EXTRACT(YEAR FROM repeat_end) IS NULL))) OR
-			(repeat_type IN(1, 2, 3, 5, 6) AND (
-			EXTRACT(YEAR FROM event_date) <= :year AND (EXTRACT(YEAR FROM repeat_end) >= :year OR EXTRACT(YEAR FROM repeat_end) IS NULL) AND
-			EXTRACT(MONTH FROM event_date) <= :month AND (EXTRACT(MONTH FROM repeat_end) >= :month OR EXTRACT(MONTH FROM repeat_end) IS NULL)))
+			(repeat_type = 4 AND 
+                EXTRACT(MONTH FROM event_date) = :month AND 
+			    (
+                    EXTRACT(YEAR FROM event_date) <= :year AND (EXTRACT(YEAR FROM repeat_end) >= :year OR EXTRACT(YEAR FROM repeat_end) IS NULL)
+                )
+            ) OR
+			(repeat_type IN(1, 2, 3, 5, 6) AND 
+                (
+                    (                
+                    EXTRACT(YEAR FROM event_date) <= :year AND (EXTRACT(YEAR FROM repeat_end) >= :year OR EXTRACT(YEAR FROM repeat_end) IS NULL) AND
+                    EXTRACT(MONTH FROM event_date) <= :month AND (EXTRACT(MONTH FROM repeat_end) >= :month OR EXTRACT(MONTH FROM repeat_end) IS NULL)
+                    ) OR
+                    (
+                    EXTRACT(YEAR FROM event_date) < :year AND (EXTRACT(YEAR FROM repeat_end) >= :year OR EXTRACT(YEAR FROM repeat_end) IS NULL)
+                    )
+                )
+            )
 		";
 		include("class/connect.php");
 		$stmt = $pdo->prepare($col_select);
@@ -181,7 +199,7 @@ class EventCalendar
 		$start_day = $this->findDayEventBegins($event,$interval);
 		$stop_day = $this->findDayEventEnds($event);
 		for($i=$start_day; $i<= $stop_day; $i+=$interval){
-			$array_index_of_day = $i+ $this->first_day_of_this_month; // this calculates what index the day is in the array
+			$array_index_of_day = $i+ $this->first_day_of_this_month - 1; // this calculates what index the day is in the array
 			$event_count = count($this->calendar_array[$array_index_of_day]['events']);
 			$this->calendar_array[$array_index_of_day]['events'][$event_count]['id'] = $event->event_id;
 			$this->calendar_array[$array_index_of_day]['events'][$event_count]['title'] = $event->event_title;
@@ -193,12 +211,12 @@ class EventCalendar
 		$first_weekday = $this->findDateOfNthDay(1, $event_weekday);
 		if($event->year == $this->this_year){
 			if($event->month == $this->this_month){
-				$start_day = $event->day - 1;
+				$start_day = $event->day;
 			} else {
-				$start_day = $interval == 1 ? 0 : $first_weekday - 1;
+				$start_day = $interval == 1 ? 1 : $first_weekday;
 			}
 		} else {
-			$start_day = $interval == 1 ? 0 : $first_weekday - 1;
+			$start_day = $interval == 1 ? 1 : $first_weekday;
 		}
 		return $start_day;
 	}
@@ -206,7 +224,7 @@ class EventCalendar
 	private function findDayEventEnds ($event){
 		if($event->end_year == $this->this_year){
 			if($event->end_month == $this->this_month){
-				$stop_day = $event->end_day - 1;
+				$stop_day = $event->end_day;
 			} else {
 				$stop_day = $this->this_month_number_of_days;
 			}
@@ -290,5 +308,40 @@ class EventCalendar
 		$table .= "</tr></tbody></table>";
 		return $this->calendar_header.$table;
 	}
+    public function getNext3Events($todays_date, $event_list_index = 0, $number_of_recursion = 0, $event_list = []){
+        $starting_index = $todays_date + $this->first_day_of_this_month;
+        //$event_list = [];
+        $event_information = [];
+        for($i = $starting_index; $i < self::CALENDAR_SIZE; $i++){
+            if($event_list_index >= 3){break;}
+            if(count($this->calendar_array[$i]['events']) > 0){
+                foreach($this->calendar_array[$i]['events'] as $val){
+                    $event_information['year'] = $this->this_year;
+                    $event_information['month'] = $this->this_month;
+                    $event_information['day'] = $this->calendar_array[$i]['day'];
+                    $event_information['id'] = $val['id'];
+                    $event_information['title'] = $val['title'];
+                    $event_list[$event_list_index] = $event_information;
+                    $event_list_index++;
+                }
+            }
+        }
+        if($event_list_index < 3 and $number_of_recursion < 4){
+            $this->changeMonth();
+            $event_list = $this->getNext3Events(0, $event_list_index, $number_of_recursion + 1, $event_list);
+        }
+        return $event_list;
+    } 
+    private function changeMonth(){
+        if($this->this_month === 12){
+            $this->this_month = 1;
+            $this->this_year += 1;
+        } else {
+            $this->this_month += 1;
+        }
+        $this->fillDaysVariables();
+		$this->fillCalendar();
+		$this->getEventsFromDB($this->request_obj);
+    }
 }
 ?>

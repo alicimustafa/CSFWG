@@ -6,7 +6,7 @@ determine if only section of a page or a whole page and if front pannel or back
 checks to see if the user has a valid token and if valid sets the user name and account type
 */   
 class RequestObject {
-    public $full_url = "http://csfwg:8080/";
+    public $full_url = "/";
     public $valid_user = false;  
     public $user_name = ""; 
 	public $user_id = "";
@@ -18,13 +18,15 @@ class RequestObject {
 	public $back = false;
     public $log_err = "";
 	public $sync_token ="";
-	public $db_password, $db_username, $enc_key;
+	public $db_password, $db_username, $enc_key, $due_date_month, $due_date_day;
 	private $params = array();
     function __construct(){
 		$ini_file = parse_ini_file("CSFWGcinfig.ini.php");
 		$this->db_password = $ini_file['dbPassword'];
 		$this->db_username = $ini_file['dbUserName'];
 		$this->enc_key = $ini_file['encrypttionKey'];
+        $this->due_date_month = $ini_file['dueMonth'];
+        $this->due_date_day = $ini_file['dueDay'];
     }
 	public function checkCookie($jwt_verify){
         if(isset($_COOKIE['jwt'])){     // checking if the person is loged in and their token is autentic

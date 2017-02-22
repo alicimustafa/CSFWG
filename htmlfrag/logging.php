@@ -94,6 +94,7 @@ echo $log_err;
 <?php echo $form_field; ?>
   <input type="hidden" id="logging-val" value="<?php echo $logging_value; ?>">
   <input type="hidden" id="sync-token" value="<?php echo $sync_token; ?>">
+  <input type="hidden" id="member-rank" value="<?php echo $request_obj->account_priv; ?>">
   <input type="submit" id="log-submit" value="<?php echo $submit_val; ?>">
 </form>
 <?php 

@@ -2,7 +2,6 @@
 /*this is the section that will be run when any request comes to the server
 it will read the request send the proper page info
 if there no request it will just send the home page */
-include("crt_functions.php");
 function class_autoloader($class){
 	include 'class/' . $class . '.php';
 }
@@ -13,16 +12,19 @@ info used in the rest of the site */
 $request_obj = new RequestObject(); 
 $jwt_signature = new JwtSignature($request_obj->enc_key);
 $request_obj->checkCookie($jwt_signature);
+$admin_display = 'style="display:none"';
+$nav_display = 'style="display:none"';
 //fallowing will list navigation bar links displayed depends on loged and valid
 if($request_obj->valid_user){
     $nav_display = 'style="display:inline"';
-} else {
-    $nav_display = 'style="display:none"';
-}
+    if($request_obj->account_priv == "Admin"){
+        $admin_display = 'style="display:inline"';
+    }
+} 
+
 if(isset($_REQUEST['request'])){
     $request_obj->read_url($_REQUEST['request']);
     $request_obj->checkSyncToken();
-    //print_r($request_obj);
     switch ($request_obj->end_point){
         case "home":
             $main_pannel = "htmlfrag/home.php";
@@ -62,6 +64,16 @@ if(isset($_REQUEST['request'])){
 		case "calendar":
 		    $main_pannel = "htmlfrag/calendar.php";
 			break;
+        case "event":
+            $main_pannel = "htmlfrag/event.php";
+            break;
+        case "admin":
+            if($request_obj->account_priv == "Admin" and $request_obj->valid_user){
+                $main_pannel = "htmlfrag/admin.php";
+            } else {
+                $main_pannel = "htmlfrag/unauthorize.php";
+            }
+            break;
         default :
             $main_pannel = "htmlfrag/error.php";
     }
