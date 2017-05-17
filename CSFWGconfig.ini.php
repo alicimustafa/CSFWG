@@ -7,12 +7,11 @@ dbUserName = root
 dbPassword = 
 
 [encrypttion info] 
-encrypttionKey = 4fd58e1e6144347beb40 
+encrypttionKey = 2f9f48f2df325667bc88
 
 [due date]
-dueMonth = 1
-dueDay = 1
+dueMonth = 2
+dueDay = 3
 ;*/  
 
 ;?> 
-		

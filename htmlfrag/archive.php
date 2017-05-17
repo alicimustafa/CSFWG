@@ -45,16 +45,14 @@ function createArchiveSectionTable($request_obj){
 	$stmt = $pdo->prepare($col_select);
 	$stmt->execute($up_array);
 	$table_body = "<tbody>";
+    if(!$stmt){ return "Achive is empty";}
 	while($row = $stmt->fetch(PDO::FETCH_ASSOC)){//build the table body
+        $group_name = $row['group_name'] ?? "ungrouped members";
 		$table_body .= '<tr><td>'.$row['first_nm'].'</td><td>'.$row['archive_disc'].'</td><td><a href="'.$request_obj->full_url.$row['archive_path'].'" target="_blank"><img src="'.$request_obj->full_url.'images/pdficon.png"</a></td></tr>';
 	}
-	if(isset($row['group_name'])){// changes the page intro based on group or ungrouped
-		echo "<h1>Archive for ".$row['group_name']." ".$up_array[':year']." ".$up_array[':month']."</h1>";
-	} else {
-		echo "<h1>Archive for ungrouped members ".$up_array[':year']." ".$up_array[':month']."</h1>";
-	}
-	echo "<table><thead><tr><th>Author name</th><th>File discription</th><th>File</th></tr></thead>";
-	return $table_body."</tbody></table>";
+    $page_header = "<br><h4 class='centered'>Archive for ".$group_name." ".$up_array[':year']." ".$up_array[':month']."</h4><br>";
+	$table_header = "<table><thead><tr><th>Author name</th><th>File discription</th><th>File</th></tr></thead>";
+	return $page_header.$table_header.$table_body."</tbody></table>";
 }
 function createWholeArchiveTable($request_obj){
 	$col_select = "
@@ -71,8 +69,11 @@ function createWholeArchiveTable($request_obj){
 		GROUP BY arc_year, arc_month, groups.weekday_id
 		ORDER BY DATE_FORMAT(archive.submit_date, '%Y,%m') DESC ,groups.weekday_id ASC	";
 	include("class/connect.php");
+    $stmt = $pdo->query("SET sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));");
 	$stmt = $pdo->query($col_select);
 	$first_row = true;
+    
+    if(!$stmt){ return "Achive is empty";}
 	while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
 		/*
 		this will build the tables that hold the archive info
@@ -96,7 +97,7 @@ function createWholeArchiveTable($request_obj){
 			$curent_row = '<tr>'.$table_data;
 			$curent_table_body = '<tbody>';
 			$curent_table_header = '<thead><tr>'.'<th>'.$row['group_name'].'</th>';
-			$year_section = '<div class="year-section"><h4 class="arc-year">'.$row['arc_year'].'</h4><table class="closed-section">';
+			$year_section = '<div class="year-section"><h4 class="arc-year">'.$row['arc_year'].'<span class="archive-arrow"> &#9654;</span></h4><table class="closed-section">';
 			$header_disp = true;
 		} else {
 			if($curent_year == $row['arc_year']){

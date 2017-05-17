@@ -6,25 +6,23 @@ modifying events
 */
 switch($request_obj->arg[0]){
 	case "displayMonth":
-		$request_obj->arg[2] = date("n");
-		$request_obj->arg[1] = date("Y");
-		$cal_obj = new EventCalendar($request_obj);
+		$cal_obj = new EventCalendar($request_obj, date("Y"), date("n"));
 		echo $cal_obj->createTable();
 	    break;
 	case "changeMonth":
-		$cal_obj = new EventCalendar($request_obj);
+		$cal_obj = new EventCalendar($request_obj, $request_obj->arg[1], $request_obj->arg[2]);
 		echo $cal_obj->createTable();
 		break;
 	case "eventDay":
 	    switch($request_obj->action){
 			case "POST":
 			    if($request_obj->account_priv == "Officer" or $request_obj->account_priv == "Admin"){createNewEvent($request_obj);}
-				$cal_obj = new EventCalendar($request_obj);
+				$cal_obj = new EventCalendar($request_obj, $request_obj->arg[1], $request_obj->arg[2]);
 				echo $cal_obj->createTable();
 				break;
 			case "PUT":
 			    if($request_obj->account_priv == "Officer" or $request_obj->account_priv == "Admin"){updateEvent($request_obj);}
-				$cal_obj = new EventCalendar($request_obj);
+				$cal_obj = new EventCalendar($request_obj, $request_obj->arg[1], $request_obj->arg[2]);
 				echo $cal_obj->createTable();
 				break;
 			case "GET":
@@ -35,7 +33,7 @@ switch($request_obj->arg[0]){
 				break;
 			case "DELETE":
 			    if($request_obj->account_priv == "Officer" or $request_obj->account_priv == "Admin"){deleteEvent($request_obj);}
-				$cal_obj = new EventCalendar($request_obj);
+				$cal_obj = new EventCalendar($request_obj, $request_obj->arg[1], $request_obj->arg[2]);
 				echo $cal_obj->createTable();
 				break;
 		}
@@ -64,7 +62,6 @@ function createNewEvent($request_obj){
     VALUES 
 	(:title , :date , :repeat , $end_date_injection , :type , :disc )
 	";
-	print_r($up_array);
 	include "class/connect.php";
 	$stmt = $pdo->prepare($col_select);
 	$stmt->execute($up_array);

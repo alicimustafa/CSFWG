@@ -43,8 +43,8 @@ if(isset($request_obj->arg[0])){// checks to see if you are looking at a individ
 	?>
 	<div class="rotateable front-pannel <?php if($request_obj->back){echo "flipped";} ?> ">
 		<?php echo $flip_button ?>
-		<h2> <?php echo $row['group_name']; ?> </h2>
-		<h3><?php echo "Meets on ",$row['weekday']; ?></h3>
+		<h3> <?php echo $row['group_name']; ?> </h3>
+		<p><?php echo "Meets on ",$row['weekday']; ?></p>
 		<div class="group-pic"><img src="<?php echo $request_obj->full_url.$img_src ?>" alt="group picture"></div>
 		<div class="group-disc"><p><?php echo $row['group_description'] ?></p></div>
 		<div class="group-members">
@@ -61,26 +61,26 @@ if(isset($request_obj->arg[0])){// checks to see if you are looking at a individ
 	</div>
 	<div class="rotateable back-pannel <?php if($request_obj->back){echo "flipped";} ?>">
 		<?php echo $flip_button ?>
-		<h2> <?php echo $row['group_name']; ?> </h2>
-		<h3><?php echo "Meets on ", '<select id="weekday-select"><option value="',$row['weekday_id'],'">',$row['weekday'],'</option>'; 
+		<h3> <?php echo $row['group_name']; ?> </h3>
+		<p><?php echo "Meets on ", '<select id="weekday-select"><option value="',$row['weekday_id'],'">',$row['weekday'],'</option>'; 
 		foreach($weekdays as $key => $value){
 			$keyp = $key+1;
 			if($keyp == $row['weekday_id']){continue;}
 			echo "<option value='$keyp'> $value </option>";
 		}
 		echo "</select>";
-		?></h3>
+		?></p>
 		<div class="group-pic"><img src="<?php echo $request_obj->full_url.$img_src ?>" alt="group picture">
-		<form enctype="multipart/form-data" action="" method="POST" id="upload-pic">
+		<form enctype="multipart/form-data" action="" method="POST" id="upload-group-pic">
 		    <?php echo $picture_form; ?>
 		</form>	
 		</div>
 		<div class="group-disc">
 		    <form id="disc-update">
-			    <textarea id="disc-field" form="disc-update" maxlength="1200" cols="60" rows="20">
+			    <textarea id="disc-field" form="disc-update" maxlength="1200" cols="60" rows="17">
 				<?php echo $row['group_description']; ?>
 				</textarea>
-				<input type="submit" value="Change discription">
+				<input type="submit" value="Change description">
 			</form>
 		</div>
 		<div class="group-members">
@@ -155,7 +155,7 @@ function createGroupGrid($request_obj, $group_officer){
 		} else {
 			$member_pic = "images/profilePics/default.jpg";
 		}
-		$group_member .= '<div class="group-member"><a href="/profile/'.$group_row['member_id'].'" data-link="profile/'.$group_row['member_id'].'">';
+		$group_member .= '<div class="group-member auto-scroll"><a href="/profile/'.$group_row['member_id'].'" data-link="profile/'.$group_row['member_id'].'">';
 	    $group_member .= '<img src="'.$request_obj->full_url.$member_pic.'" alt="member picture"><p>'.$group_row['first_nm'].'</p></a></div>';
 	}
 	$return['officer_name'] = $officer_name;
@@ -207,11 +207,11 @@ function displayAllGroups($request_obj){
 		} else {
 			$img_src = $request_obj->full_url."images/groupPics/defaultGroup.png";
 		}
-		$group_display .= '<div class="group-div"><a class="group-link" href="/groups/'.$row['group_id'].'" data-link="groups/'.$row['group_id'].'">';
+		$group_display .= '<div class="group-div centered auto-scroll"><a class="group-link" href="/groups/'.$row['group_id'].'" data-link="groups/'.$row['group_id'].'">';
 		$group_display .= "<img src='$img_src' alt='group picture'>";
-		$group_display .= "<p>".$row['group_name']." meets on ".$row['weekday']."</p>";
+		$group_display .= "<p>".$row['group_name']."</p></a><p>meets on ".$row['weekday']."</p>";
 		$group_display .= "<p>Led by ".$row['first_nm']."</p>";
-		$group_display .= '</a></div>';
+		$group_display .= '</div>';
 	}
 	return $group_display;
 }
@@ -240,11 +240,11 @@ function uploadGroupPicture($request_obj){
 		/*
 		generating path where the picture will be strored for actual file and for the database
 		*/
-		$picture_path = "images/profilePics/group".$group_id.$extention;
+		$picture_path = "images/groupPics/group".$request_obj->arg[0].$extention;
 		$col_input = "
-			UPDATE member_profile
-			SET member_pic = :path
-			WHERE member_id = :id
+			UPDATE groups
+			SET group_pic = :path
+			WHERE group_id = :id
 		";
 		$up_array[':path'] = $picture_path;
 		$up_array[':id'] = $request_obj->arg[0];

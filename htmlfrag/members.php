@@ -252,8 +252,8 @@ function reactivateMember($request_obj){
 	$stmt->execute(array(':uname'=>$_REQUEST['email'], ':memid'=>$_REQUEST['member_id']));
 }
 function changeGroupOfficer($request_obj){
-	$officer_id = test_input($_REQUEST['officer_id']);
-	$group_id = test_input($_REQUEST['group_id']);
+	$officer_id = $_REQUEST['officer_id'];
+	$group_id = $_REQUEST['group_id'];
 	include("class/connect.php");
 	$col_select ="
 		UPDATE groups
@@ -268,12 +268,14 @@ fillMemberTable($members_tabel, $request_obj);
 
 function fillMemberTable($members_tabel, $request_obj){
 	include("class/connect.php");
+    $year = checkDueDate($request_obj);
 	$col_select = "
 		SELECT 
 		members.first_nm AS name,
 		members.last_nm AS lname,
 		ranks.rank_name AS rank,
-		member_id AS id
+		members.member_id AS id,
+        (SELECT payment_year FROM due_payment WHERE due_payment.member_id = members.member_id AND payment_year = $year LIMIT 1) AS year
 		FROM members
 		INNER JOIN ranks ON members.rank_id = ranks.rank_id
 		WHERE ranks.rank_name IN ('Admin' , 'Officer' ,'Member' , 'Alumni')
@@ -284,7 +286,13 @@ function fillMemberTable($members_tabel, $request_obj){
 		$members_tabel->proces_row($row);
 	}
 }
-
+function checkDueDate($request_obj){
+    $year = date("Y");
+    $month = date("n");
+    $day = date("j");
+    if($month <= $request_obj->due_date_month and $day <= $request_obj->due_date_day){return $year-1;}
+    return $year;
+}
 $group_list = new GroupsList();
 fillGroupList($group_list, $request_obj);
 
@@ -314,11 +322,11 @@ function fillGroupList($group_list, $request_obj){
 ?>
 <div class="rotateable front-pannel <?php if($request_obj->back){echo "flipped";} ?> ">
     <?php echo $flip_button ?>
-	<div class="member-section">
+	<div class="member-section auto-scroll">
 	<div class="members-list">
 		<table>
 			<thead>
-			  <tr><th>Name</th><th>Rank</th></tr>
+			  <tr><th>Name</th><th>Rank</th><th>Dues Payed</th></tr>
 			</thead>
 			<tbody>
 		<?php echo $members_tabel->display("Member"); ?>
@@ -327,7 +335,7 @@ function fillGroupList($group_list, $request_obj){
 	</div>
 
 	</div>
-	<div class="group-section">
+	<div class="group-section auto-scroll">
 	<div class='group-list'>
 	    <?php $group_list->display("Member"); ?>
 	</div>
@@ -335,11 +343,11 @@ function fillGroupList($group_list, $request_obj){
 </div>
 <div class="rotateable back-pannel <?php if($request_obj->back){echo "flipped";} ?>">
     <?php echo $flip_button ?>
-	<div class="member-section">
+	<div class="member-section auto-scroll">
 	<div class="members-list">
 		<table>
 			<thead>
-			  <tr><th>Name</th><th>Rank</th></tr>
+			  <tr><th>Name</th><th>Rank</th><th>Dues Payed</th></tr>
 			</thead>
 			<tbody>
 		<?php echo $members_tabel->display($request_obj->account_priv); ?>
@@ -352,7 +360,7 @@ function fillGroupList($group_list, $request_obj){
 	</div>
 
 	</div>
-	<div class="group-section">
+	<div class="group-section auto-scroll">
 	<div class='group-list'>
 	<?php $group_list->display($request_obj->account_priv); ?>
 	</div>

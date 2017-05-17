@@ -57,15 +57,54 @@ fieldset {
     padding-right: 0.75em;
     border: 2px groove;
 } 
+h1 {
+    font-size:3em;
+    font-weight:900
+}
+h2 {
+    font-size:2.5em;
+    font-weight:700
+}
+h3 {
+    font-size:2em;
+    font-weight:600
+}
+h4 {
+    font-size:1.5em;
+    font-weight:500;
+}
+table {
+    width:90%;
+    margin:1em;
+}
+tr:nth-child(even) {
+    background-color:#cce6ff
+}
+th, tr {
+    padding:3px;
+    text-align:left;
+}
+th {
+   background-color:#0073e6;
+   color:#FFFFFF;
+   font-size:1.2em;
+   font-weight:600
+}
+
+/* header image style begins*/
+
+
+/* end */
+
 /* back ground and wrap style begin */
 
 body {
-    background-color:#E4C27C
+    background-color:#000000;
 }
 #wrap {
-     background-color:#FFFFFF;
+     background-color:#331a00;
      width:85em;
-     height:60em;
+     height:70em;
      margin-left:auto;
      margin-right:auto   
 }
@@ -75,47 +114,57 @@ body {
 #nav-bar {
     background-color:#000000;
     width:85em;
-    height:3em;
-}
-#nav-bar ul {
-	float:left;
-	width:70em;
+    height:2em;
 }
 #nav-bar ul li {
-    color:#FF0066;
+    color:#FFFFFF;
     font-family:Arial, Helvetica, sans-serif;
-    font-size:1.5em;
+    font-size:2em;
     display:inline;
-    margin:0 .5em 0 .5em;
+    padding-left: .5em;
+}
+#nav-bar ul li a:link {
+    color:#FFFFFF;
+    text-decoration: none;
+}
+#nav-bar ul li a:visited {
+    color:#FFFFFF;
+    text-decoration: none;
+}
+#nav-bar ul li:hover {
+    background-color:#adad85;
 }
 /* nav barr end */
 
 /* calendar section style begin */
 #calendar-section {
-	float:left
+	float:left;
+    position: relative;
 }
-#calendar-icon {
-	cursor:pointer
-}
-#mini-calendar-icon {
+#calendar-icon , #mini-calendar-icon {
 	cursor:pointer
 }
 #calendar-pannel {
 	position:absolute;
 	width:60em;
-	height:30em;
-	border:1px #00FF00 solid;
+	height:29.9em;
 	background:#FFFFFF;
-	z-index:1
+	z-index:1;
+    box-shadow: 10px 10px 5px #595959;
 }
 #calendar-pannel table {
 	clear:both;
 	width:60em;
-	height:28.5em
-} 
+	height:28em;
+    margin:0;
+}
+#calendar-pannel table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
 .event-area {
 	width:8.5em;
-	height:4em;
+	height:3.1em;
 	overflow:auto
 }
 #calendar-pannel ul {
@@ -128,24 +177,27 @@ body {
 }
 #left-arrow {
 	float:left;
-	color:#00FF00;
+	color:#000099;
 	font-size:1.5em;
 	cursor:pointer
 }
 #right-arrow {
 	float:right;
-	color:#00FF00;
+	color:#000099;
 	font-size:1.5em;
 	cursor:pointer
 }
 .this-month {
-	background: #ff0066
+	background: #FFFFFF
 }
 .this-month:hover {
 	background: #E36D9E
 }
 .not-month {
 	background: #6699ff
+}
+.is-today {
+	background: #ffff00
 }
 .event-area ul li{
 	font-size:.85em;
@@ -154,20 +206,31 @@ body {
 }
 #calendar-event {
 	position:absolute;
-	border:1px #00FF00 solid;
+	border:1px #000000 solid;
 	width:40em;
 	height:30em;
 	background:#FFFFFF;
-	z-index:2
+    box-shadow: 10px 10px 5px #595959;
+	z-index:2;
+    left:2em;
+    top:6em
 }
 #mini-calendar {
-	width:8em;
-	height:9em;
+	width:18em;
+	height:11em;
 	background:#FFFFFF;
 	position:absolute;
-	z-index:4
+	z-index:4;
+    text-align:center;
+    border:1px #000000 solid; 
+    box-shadow: 10px 10px 5px #595959;
+    left:1em;
+    top:3em
 }
-#mini-calendar td {
+#event-end-area {
+    position: relative;
+}
+#mini-calendar td.this-month {
 	cursor:pointer
 }
 #year-month-mini {
@@ -177,35 +240,27 @@ body {
 }
 #left-arrow-mini {
 	float:left;
-	color:#00FF00;
-	font-size:1em;
-	cursor:pointer
+	color:#000099;
+	font-size:2em;
+	cursor:pointer;
 }
 #right-arrow-mini {
 	float:right;
-	color:#00FF00;
-	font-size:1em;
+	color:#000099;
+	font-size:2em;
 	cursor:pointer
 }
 /* calendar section style end */
 
-/* logo style begin */
-#logo {
-    float:left;
-    width:12.6em;
-    height:7.2em;
-    border:1px #00FF00 solid;
-    
-}
-/* end */
 
 /* log pannel style begin */
 #log-pannel {
     float:left;
     clear:left;
-    width:12.6em;
-    height:20em;
-    border:1px #00FF00 solid;
+    width:11em;
+    height:15em;
+    background-color:#FFFFFF;
+    margin:5em 5em 0 3em;
 }
 /* end */
 
@@ -213,9 +268,10 @@ body {
 #social-pannel {
     float:left;
     clear:left;
-    width:12.6em;
-    height:5em;
-    border:1px #00FF00 solid;
+    width:11em;
+    height:3em;
+    background-color:#FFFFFF;
+    margin:0 5em 0 3em
 }
 #social-pannel ul li {
     display:inline
@@ -225,24 +281,25 @@ body {
 /* right pannel style begin */
 #right-pannel {
     float:right;
-    width:12em;
-    height:22em;
-    border:1px #00FF00 solid;
-
+    width:9em;
+    height:18em;
+    background-color:#FFFFFF;
+    margin:5em 3em 0 5em;
 }
 /* end */
 
 /* main pannel style begin */
 #main-pannel {
-    height:56em;
-    width:60em;
-    position:absolute
+    height:48em;
+    width:49em;
+    position:absolute;
+    background-color:#FFFFFF;
 }
 #inner-wrap {
     float:right;
-    height:56em;
-    width:60em;
-    border:1px #00FF00 solid;
+    height:48em;
+    width:49em;
+    margin-top:3em;
 }
 /* end */
 /* pannel rotate style begin */
@@ -258,6 +315,7 @@ body {
 	transition: transform 0.3s;
 	background: #FFFFFF;
 	width:100%;
+    height:100%;
 }
 .back-pannel {
 	-webkit-transform:rotateY(180deg);
@@ -275,16 +333,16 @@ body {
 /* members page styles begin */
 .member-section {
 	float:left;
-	width:30em
+	width:24em
 }
 
 .members-list {
     float:left;
-    width:30em
+    width:24em
 }
 .group-section {
     float:right;
-    width:28em
+    width:25em
 }
 .high-drop {
     background:#66FF66
@@ -299,13 +357,11 @@ body {
 .profile-pic {
 	width:20em;
 	height:20em;
-    border:1px #00FF00 solid;
 	float:left
 }
 .profile-qte{
-	width:39em;
-	height:30em;
-    border:1px #00FF00 solid;
+	width:29em;
+	height:20em;
 	float:right
 }
 .profile-info{
@@ -313,7 +369,8 @@ body {
 }
 .profile-pic img {
 	width:100%;
-	max-width:300px
+	max-width:280px;
+    max-height:280px
 }
 #profile-nav {
 	clear:both;
@@ -333,17 +390,29 @@ body {
 #profile-update {
 	width:100%;
 	border:1px #000000 solid;
-	height:20em
+	height:26em
+}
+#profile-form {
+    width:24em;
+    float:left
+}
+#change-password {
+    width:24em;
+    float:right
+}
+#change-email {
+    width:24em;
+    float:right
 }
 #archive-update {
 	width:100%;
 	border:1px #000000 solid;
-	height:20em
+	height:26em
 }
 #dues-section {
 	width:100%;
 	border:1px #000000 solid;
-	height:20em
+	height:26em
 }
 .open-tab {
     background-color:#FFFFFF
@@ -355,37 +424,42 @@ body {
 	display:block
 }
 .closed-section {
-	display:none
+	display:none;
+    padding: 0em;
 }
 /* profile page style end */
 .arc-year {
 	cursor:pointer
 }
 /* groups page style start */
+.group-div {
+    width:33%;
+    float:left;
+}
+.group-div img {
+    max-width:200px;
+}
 .group-pic {
-	width:35%;
-	height:22em;
-    border:1px #00FF00 solid;
+	width:36%;
+	height:18em;
 	float:left
 }
 .group-disc {
 	width:64%;
-	height:22em;
-    border:1px #00FF00 solid;
+	height:18em;
 	float:right
 }
 .group-members {
 	clear:both;
 	width:100%;
-	height:33em;
-    border:1px #00FF00 solid;
+	height:25em;
 }
 .group-members h4 {
 	text-align:center
 }
 .group-pic img {
 	width:100%;
-	max-width:300px
+	max-width:250px
 }
 .officer-list {
 	width:100%;
@@ -416,10 +490,21 @@ body {
     background-position:center;
     background-repeat:no-repeat;
     z-index:1;
-    height:56em;
-    width:60em;
-    position:absolute
+    height:48em;
+    width:49em;
+    position:absolute;
+    background-color:#FFFFFF;
 }
 .error {
 	color:#FF0000
+}
+.large-font {
+    font-size:3em;
+    font-weight:900;
+}
+.centered {
+    text-align:center
+}
+.auto-scroll {
+    overflow:auto;
 }

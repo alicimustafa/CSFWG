@@ -7,6 +7,7 @@ function class_autoloader($class){
 }
 spl_autoload_register('class_autoloader');
 date_default_timezone_set("America/Denver");
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 /* this will create and request object that will hold 
 info used in the rest of the site */
 $request_obj = new RequestObject(); 
@@ -48,9 +49,6 @@ if(isset($_REQUEST['request'])){
             break;
         case "profile":
             $main_pannel = "htmlfrag/profile.php";
-            break;
-        case "workshop":
-            $main_pannel = "htmlfrag/workshop.php";
             break;
         case "resources":
             $main_pannel = "htmlfrag/resources.php";

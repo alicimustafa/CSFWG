@@ -1,0 +1,3 @@
+<h1>Resource Page</h1>
+<p>stuff</p>
+<p>yes more stuff</p>

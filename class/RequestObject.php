@@ -21,7 +21,7 @@ class RequestObject {
 	public $db_password, $db_username, $enc_key, $due_date_month, $due_date_day;
 	private $params = array();
     function __construct(){
-		$ini_file = parse_ini_file("CSFWGcinfig.ini.php");
+		$ini_file = parse_ini_file("CSFWGconfig.ini.php");
 		$this->db_password = $ini_file['dbPassword'];
 		$this->db_username = $ini_file['dbUserName'];
 		$this->enc_key = $ini_file['encrypttionKey'];

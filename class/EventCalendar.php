@@ -9,7 +9,7 @@ class EventCalendar
     private $request_obj;
 	private $account; //privilage level of the user
 	
-	public function __construct($request_obj){
+	public function __construct($request_obj, $year, $month){
 		/*
 		the contructor will set several variables
 		it will set the current day year and mont
@@ -20,17 +20,17 @@ class EventCalendar
 		on each day
 		*/
 		$this->account = $request_obj->account_priv;
-		$this->this_month = $request_obj->arg[2] ?? date("n");
-		$this->this_year = $request_obj->arg[1] ?? date("Y");
+		$this->this_month = $month;
+		$this->this_year = $year;
         $this->request_obj = $request_obj;
         $this->fillDaysVariables();
 		$this->fillCalendar();
 		$this->getEventsFromDB($request_obj);
 		$this->calendar_header = '
 			<div id="calendar-arrows" data-month="'.$this->this_month.'" data-year="'.$this->this_year.'">
-			<span id="left-arrow">&#x21E6</span>
-			<span id="year-month">'.$this->this_month.' '.$this->this_year.'</span>
-			<span id="right-arrow">&#x21E8</span>
+			<span id="left-arrow">&#11013;</span>
+			<span id="year-month">'.MONTH_NAMES[$this->this_month-1].' '.$this->this_year.'</span>
+			<span id="right-arrow">&#10145;</span>
 			</div>
 		';
 	}
@@ -39,10 +39,10 @@ class EventCalendar
 		$this->this_month_number_of_days = date('t', mktime(1,1,1,$this->this_month,1,$this->this_year));
 		if($this->this_month == 1 ){
 			$last_month = 12;
-			$last_year = $this->this_year - 1;//request_obj->arg[1]-1;
+			$last_year = $this->this_year - 1;
 		} else {
-			$last_month = $this->this_month - 1;//$request_obj->arg[2]-1;
-			$last_year = $this->this_year;//$request_obj->arg[1];
+			$last_month = $this->this_month - 1;
+			$last_year = $this->this_year;
 		}
 		$this->last_month_number_of_days = date('t', mktime(1,1,1,$last_month,1,$last_year));
 		$this->first_day_of_this_month = date('w', mktime(1,1,1,$this->this_month,1,$this->this_year));
@@ -53,28 +53,34 @@ class EventCalendar
 			$day_ct = 1;
 			$not_month = false;
 			$add_event = $this->checkToAddEvent($day_ct);
+            $is_today = $this->checkIfIsToday($day_ct);
 		} else {
 			$day_ct = $this->last_month_number_of_days - $this->first_day_of_this_month +1;
 			$not_month = true;
 			$add_event = false;
+            $is_today = false;
 		}
 		for($i=0; $i < self::CALENDAR_SIZE; $i++){
 			if($not_month){
 				$add_event = false;
+                $is_today = false;
 			    if($day_ct > $this->last_month_number_of_days){
 					$day_ct = 1;
 					$add_event = $this->checkToAddEvent($day_ct);
+                    $is_today = $this->checkIfIsToday($day_ct);
 					$not_month = false;
 				}
 			} else {
 			    $add_event = $this->checkToAddEvent($day_ct);
+                $is_today = $this->checkIfIsToday($day_ct);
 				if($day_ct > $this->this_month_number_of_days){
 					$day_ct = 1;
 					$not_month = true;
 					$add_event = false;
+                    $is_today = false;
 				}
 			}
-     		$this->calendar_array[$i] = array('day'=>$day_ct, 'events'=>array(), 'not_month'=>$not_month,'add_event'=>$add_event);
+     		$this->calendar_array[$i] = array('day'=>$day_ct, 'events'=>array(), 'not_month'=>$not_month,'add_event'=>$add_event, 'is_today' =>$is_today);
 			$day_ct++;
 		}
 	}
@@ -85,6 +91,13 @@ class EventCalendar
 			return false;
 		}
 	}
+    private function checkIfIsToday($day){
+		$current_day = date("j");
+		$current_month = date("n");
+		$current_year = date("Y");
+        if($this->this_year == $current_year and $this->this_month == $current_month and $day == $current_day){ return true;}
+        return false;
+    }
 	private function checkIfCurrentDay($day){//checks if the date is a current of future date
 		$current_day = date("j");
 		$current_month = date("n");
@@ -298,7 +311,8 @@ class EventCalendar
 			}
 			$month = $val['not_month'] ? "not-month" : "this-month";
 			$add_button = $val['add_event'] ? "<button type='button' class='add-event' data-day='".$val['day']."'>Add event</button>" : "";
-		    $table .= "<td class='$month' data-day='".$val['day']."'><span class='calendar-day'>".$val['day']."</span>$add_button</br><div class='event-area'><ul>";
+            $is_today = $val['is_today'] ? "is-today" : "";
+		    $table .= "<td class='$month $is_today' data-day='".$val['day']."'><span class='calendar-day '>".$val['day']."</span>$add_button</br><div class='event-area'><ul>";
 			foreach($val['events'] as $ev_list){
 				$table .= "<li class='cal-event-list' data-day='".$val['day']."' data-id='".$ev_list['id']."'>".$ev_list['title']."</li>";
 			}
@@ -310,7 +324,6 @@ class EventCalendar
 	}
     public function getNext3Events($todays_date, $event_list_index = 0, $number_of_recursion = 0, $event_list = []){
         $starting_index = $todays_date + $this->first_day_of_this_month;
-        //$event_list = [];
         $event_information = [];
         for($i = $starting_index; $i < self::CALENDAR_SIZE; $i++){
             if($event_list_index >= 3){break;}

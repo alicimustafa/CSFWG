@@ -4,7 +4,7 @@
 /*jslint white: true */
 var myaMiniCalendar = (function () {
     'use strict';
-    var cur_date = {}, calendar_size = 42, cur_month_days, last_month, last_month_days, first_day, month_name = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
+    var display_date = {}, calendar_size = 42, cur_month_days, last_month, last_month_days, first_day, month_name = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
     function findNumberDays(year, month) {
         var date_obj = new Date(year, month + 1, 0);
         return date_obj.getDate();
@@ -24,24 +24,34 @@ var myaMiniCalendar = (function () {
         var date_obj = new Date(year, month, 1);
         return date_obj.getDay();
     }
+    function checkIfIsToday(day){
+        var date_obj = new Date();
+		var current_day = date_obj.getDate(),
+		current_month = date_obj.getMonth(),
+		current_year = date_obj.getFullYear();
+        if(display_date.year === current_year && display_date.month === current_month && day === current_day){ return "is-today";}
+        return "";
+    }
 
     return {
         set: function (year, month) {
-            cur_date.year = Number(year);
-            cur_date.month = Number(month);
-            cur_month_days = findNumberDays(cur_date.year, cur_date.month);
-            last_month = findLastMonthYear(cur_date.year, cur_date.month);
+            display_date.year = Number(year);
+            display_date.month = Number(month);
+            cur_month_days = findNumberDays(display_date.year, display_date.month);
+            last_month = findLastMonthYear(display_date.year, display_date.month);
             last_month_days = findNumberDays(last_month.year, last_month.month);
-            first_day = findDayOfWeekFirstDay(cur_date.year, cur_date.month);
+            first_day = findDayOfWeekFirstDay(display_date.year, display_date.month);
         },
         create: function () {
-            var i, day_count, month_class, weekday_count = 1, table = "<table><thead><tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr></thead><tbody><tr>", calendar_header;
+            var i, day_count, month_class, weekday_count = 1, table = "<table><thead><tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr></thead><tbody><tr>", calendar_header, is_today = "";
             if (cur_month_days === 0) {
                 day_count = 1;
                 month_class = "this-month";
+                is_today = checkIfIsToday(day_count);
             } else {
                 day_count = last_month_days - first_day + 1;
                 month_class = "not-month";
+                is_today = ""
             }
             for (i = 1; i <= calendar_size; i += 1) {
                 if (weekday_count === 8) {
@@ -49,23 +59,27 @@ var myaMiniCalendar = (function () {
                     weekday_count = 1;
                 }
                 if (month_class === "not-month") {
+                    is_today = "";
                     if (day_count > last_month_days) {
                         month_class = "this-month";
                         day_count = 1;
+                        is_today = checkIfIsToday(day_count);
                     }
                 } else {
+                    is_today = checkIfIsToday(day_count);
                     if (day_count > cur_month_days) {
                         month_class = "not-month";
                         day_count = 1;
+                        is_today = "";
                     }
                 }
-                table += "<td class='" + month_class + "' data-day='" + day_count + "'>" + day_count + "</td>";
+                table += "<td class='" + month_class + " " + is_today + "' data-day='" + day_count + "'>" + day_count + "</td>";
                 day_count++;
                 weekday_count++;
             }
             table += "</tr></tbody></table>";
-            calendar_header = '<div id="calendar-arrows-mini" data-month="' + cur_date.month + '" data-year="' + cur_date.year;
-            calendar_header += '"><span id="left-arrow-mini">&#x21E6</span><span id="year-month-mini">' + month_name[cur_date.month] + ' ' + cur_date.year;
+            calendar_header = '<div id="calendar-arrows-mini" data-month="' + display_date.month + '" data-year="' + display_date.year;
+            calendar_header += '"><span id="left-arrow-mini">&#x21E6</span><span id="year-month-mini">' + month_name[display_date.month] + ' ' + display_date.year;
             calendar_header += '</span><span id="right-arrow-mini">&#x21E8</span></div>';
             return calendar_header + table;
         }
@@ -149,7 +163,7 @@ var myaCSFWG = (function () {
 /* utility end */
 
     // fallowing hold varius variables used in throughout the website
-    var nav_links = document.getElementsByClassName("nav-link"), push_link = "/", url_link = "/section/", state_obj = {page: "home"};
+    var nav_links = document.getElementsByClassName("nav-link"), state_obj = {page: "home"};
 
     function calendarClickHandler(ev) {
         if (ev.target.id === "left-arrow" || ev.target.id === "right-arrow") {changeCalendarMonth(ev); }
@@ -164,7 +178,7 @@ var myaCSFWG = (function () {
         if (ev.target.id === "mini-calendar-icon") {toggleMiniCalendar(ev); }
         if (ev.target.id === "left-arrow-mini" || ev.target.id === "right-arrow-mini") {changeMiniCalendarMonth(ev); }
         if (ev.target.id === "event-delete") {deleteEvent(ev); }
-        if (ev.target.nodeName === "TD") {fillForm(ev); }
+        if (ev.target.classList.contains("this-month")) {fillForm(ev);}
     }
 
     function eventSubmitHandler(ev) {
@@ -186,16 +200,23 @@ var myaCSFWG = (function () {
         //group page
         if (findClassAncestor(ev.target,"group-link") != null) {navigateLink(ev); }
         //archibe page
-        if (ev.target.classList.contains("arc-year")) { openArchive(ev);}
+        if (ev.target.classList.contains("arc-year")) { openArchive(ev.target);}
+        if (ev.target.classList.contains("archive-arrow")) {openArchive(ev.target.parentElement);}
         if (ev.target.classList.contains("arc-link")){ navigateLink(ev);}
         //profile page
-        if ( ev.target.classList.contains("profile-tab")) {switchProfileSection(ev); }
+        if (ev.target.classList.contains("profile-tab")) {switchProfileSection(ev); }
+        if (ev.target.id == "payment-year-button") {displayPaypal(ev); }
+        if (ev.target.id == "submit-payment") {sendVouchPayment(ev); }
         //members page
         if (ev.target.classList.contains("remove-but")) {removeMemberGroup(ev); }
         if (ev.target.classList.contains("group-remove")) {removeGroup(ev); }
         if (ev.target.classList.contains("group-name")) {changeGroupName(ev); }
         if (ev.target.classList.contains("nav-link")) {navigateLink(ev); }
         if (ev.target.id == "open-reactivate") {openReactivateForm(ev); }
+        //admin page
+        if (ev.target.id == "key-reset") {resetKey(ev); }
+        //resouce page
+        if (ev.target.classList.contains("delete-resource")){deleteResourceFile(ev);}
     }
 
     function mainChangeHandler(ev) {
@@ -224,6 +245,7 @@ var myaCSFWG = (function () {
         if (ev.target.id == "add-announcement-form"){updateHomePageAnnouncement(ev);}
         //groups page
         if (ev.target.id == "disc-update") {updateGroupDiscription(ev); }
+        if (ev.target.id == "upload-group-pic") {uploadGroupPicture(ev);}
         //profile page
         if (ev.target.id == "profile-form") {memberProfileUpdate(ev); }
         if (ev.target.id == "upload-pic") {memberPictureUpload(ev); }
@@ -235,6 +257,13 @@ var myaCSFWG = (function () {
         if (ev.target.id == "add-member") {addNewMember(ev); }
         if (ev.target.id == "add-group") {addNewGroup(ev); }
         if (ev.target.id == "reactivate-form") {reactivateOldMember(ev); }
+        //admin page
+        if (ev.target.id == "member-due-date") {changeDueDate(ev);}
+        //about page
+        if (ev.target.id == "update-about-form"){updateAboutPage(ev);}
+        //resource page
+        if (ev.target.id == "resource-paragraph-form"){updateResourcePara(ev);}
+        if (ev.target.id == "resource-list-form"){uploadResourceFile(ev);}
     }
 
     function mainKeyPressHandler(ev) {
@@ -245,7 +274,6 @@ var myaCSFWG = (function () {
 
     function logClickHandler(ev) {
         if (ev.target.id == "profile-log") {navigateLink(ev); }
-        if (ev.target.id == "key-reset") {resetKey(ev); }
     }
 
     function logSubmitHandler(ev) {
@@ -275,9 +303,15 @@ var myaCSFWG = (function () {
             sec.classList.add("closed-section");
             sec.classList.remove("open-section");
         } else {
+            var sec = document.getElementById("calendar-pannel");
+            var event_sec = document.getElementById("calendar-event");
+            sec.classList.add("open-section");
+            sec.classList.remove("closed-section");
+            event_sec.classList.add("closed-section");
+            event_sec.classList.remove("open-section");
             var params = {};
             params.method = "GET";
-            params.url =  url_link+"calendar/displayMonth";
+            params.url =  "/section/calendar/displayMonth";
             params.data = null;
             params.setHeader = false;
             ajaxRequest(params, calendarResponse);
@@ -306,7 +340,7 @@ var myaCSFWG = (function () {
         }
         var params = {};
         params.method = "GET";
-        params.url =  url_link+"calendar/changeMonth/"+link_year+"/"+link_month;
+        params.url =  "/section/calendar/changeMonth/"+link_year+"/"+link_month;
         params.data = null;
         params.setHeader = false;
         ajaxRequest(params, calendarResponse);
@@ -315,12 +349,7 @@ var myaCSFWG = (function () {
         //callback for the open calendar and change month
         if(response_ok){
             var sec = document.getElementById("calendar-pannel");
-            var event_sec = document.getElementById("calendar-event");
             sec.innerHTML = response_text;
-            sec.classList.add("open-section");
-            sec.classList.remove("closed-section");
-            event_sec.classList.add("closed-section");
-            event_sec.classList.remove("open-section");
         } else {
             window.alert("there was error error: "+response_text);
         }
@@ -398,7 +427,7 @@ var myaCSFWG = (function () {
         var link_day = ev.target.getAttribute("data-day");
         var params = {};
         params.method = "GET";
-        params.url = url_link+"calendar/blankForm/"+link_year+"/"+link_month+"/"+link_day;
+        params.url = "/section/calendar/blankForm/"+link_year+"/"+link_month+"/"+link_day;
         params.data = null;
         ajaxRequest(params, calendarEventResponse);
     }
@@ -409,7 +438,7 @@ var myaCSFWG = (function () {
         var event_id = ev.target.getAttribute("data-id");
         var params = {};
         params.method = "GET";
-        params.url = url_link+"calendar/eventDay/"+link_year+"/"+link_month+"/"+link_day+"/"+event_id;
+        params.url = "/section/calendar/eventDay/"+link_year+"/"+link_month+"/"+link_day+"/"+event_id;
         params.data = null;
         params.setHeader = false;
         ajaxRequest(params, calendarEventResponse);
@@ -447,8 +476,9 @@ var myaCSFWG = (function () {
         data_object.event_discription = document.getElementById("event-discription").value;
         data_object.repeat_type = document.getElementById("event-repeat-type").value;
         data_object.event_type = null;
-        params.url = url_link+"calendar/eventDay/"+year+"/"+month+"/"+day;
+        params.url = "/section/calendar/eventDay/"+year+"/"+month+"/"+day;
         params.data = createParam(data_object);
+        params.setHeader = true;
         ajaxRequest(params, calendarResponse);
     }
     function deleteEvent(ev){
@@ -457,7 +487,7 @@ var myaCSFWG = (function () {
         var month = document.getElementById("event-month").value;
         var year = document.getElementById("event-year").value;
         params.method = "DELETE";
-        params.url = url_link+"calendar/eventDay/"+year+"/"+month+"/"+day;
+        params.url = "/section/calendar/eventDay/"+year+"/"+month+"/"+day;
         params.data = "event_id="+document.getElementById("event-id").value;
         params.setHeader = true;
         ajaxRequest(params, calendarResponse);
@@ -478,23 +508,23 @@ var myaCSFWG = (function () {
 
     function navigateLink(ev){
     /*
-    this is an event handler for the navigation bar for the varius pages
+    this is an event handler for navigation for the varius pages.
     it will load the page using ajax.  create push state in history and
-    change the url to match new page.  after that it will call a function to
-    add the appropriate event listeners. It will call function to display
+    change the url to match new page. It will call function to display
     loading gif while waiting for a response from the server
     */
+        var link_elem;
         ev.preventDefault();
         toggleLoadingGif(true);
         if(ev.target.nodeName == "A"){
-            var link_elem = ev.target;
+            link_elem = ev.target;
         } else {
-            var link_elem = ev.target.parentElement;
+            link_elem = ev.target.parentElement;
         }
         state_obj.page = link_elem.getAttribute("data-link");
         var params = {};
         params.method = "GET";
-        params.url =  url_link+state_obj.page;
+        params.url =  "/section/"+state_obj.page;
         params.data = null;
         params.setHeader = false;
         ajaxRequest(params, navigationResponse);
@@ -502,7 +532,7 @@ var myaCSFWG = (function () {
     function navigationResponse(response_ok, response_text){
         if(response_ok){
             document.getElementById("main-pannel").innerHTML = response_text;
-            history.pushState( state_obj , "", push_link+state_obj.page);
+            history.pushState( state_obj , "", "/"+state_obj.page);
             toggleLoadingGif(false);
         } else {
             window.alert("there was a problem loading page error: "+response_text);
@@ -520,7 +550,7 @@ var myaCSFWG = (function () {
         if(type_log == "loggoff"){
             document.getElementById("log-submit").disabled = true; // disables the submit till risponse from server
             params.method = "DELETE";
-            params.url = url_link + "logging";
+            params.url = "/section/logging";
             params.data = null;
             params.setHeader = false;
             ajaxRequest(params, loggoffResponse);
@@ -530,30 +560,19 @@ var myaCSFWG = (function () {
             data_object.user_name = document.getElementById("user-input").value;
             data_object.password = document.getElementById("password-input").value;
             params.method = "POST";
-            params.url = url_link + "logging";
+            params.url = "/section/logging";
             params.data = createParam(data_object);
             params.setHeader = true;
             if(params.password == "1234"){window.alert("you are using the default password please change it on your profile");}
             ajaxRequest(params, loggonResponse);
         }
     }
-    function resetKey(ev){
-        var confirm_reset = window.confirm("Are you sure you want to reset encryption key");
-        if(confirm_reset){
-            var params = {};
-            params.method = "PUT";
-            params.url = url_link + "logging";
-            params.data = null;
-            params.setHeader = false;
-            ajaxRequest(params, loggoffResponse);
-        }
-    }
     function loggoffResponse(response_ok, response_text){
         if(response_ok){
             document.getElementById("log-pannel").innerHTML = response_text;
-            nav_links[5].style.display = "none";
-            nav_links[6].style.display = "none";
-            nav_links[7].style.display = "none";
+            nav_links[5].parentElement.style.display = "none";
+            nav_links[6].parentElement.style.display = "none";
+            nav_links[7].parentElement.style.display = "none";
             refreshMainPannel();
         } else {
             document.getElementById("log-submit").disabled = false;
@@ -563,11 +582,11 @@ var myaCSFWG = (function () {
     function loggonResponse(response_ok, response_text){
         if(response_ok){
             document.getElementById("log-pannel").innerHTML = response_text;
-            nav_links[5].style.display = "inline";
-            nav_links[6].style.display = "inline";
+            nav_links[5].parentElement.style.display = "inline";
+            nav_links[6].parentElement.style.display = "inline";
             var rank = document.getElementById("member-rank").value;
             if(rank === "Admin"){
-                nav_links[7].style.display = "inline";    
+                nav_links[7].parentElement.style.display = "inline";    
             }
             refreshMainPannel();
         } else {
@@ -580,10 +599,10 @@ var myaCSFWG = (function () {
         toggleLoadingGif(true);
         var params = {};
         params.method = "GET";
-        params.url = url_link+state_obj.page;
+        params.url = "/section/"+state_obj.page;
         params.data = null;
         params.setHeader = false;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
 
     /* ---------event handlers for the common area end-------*/
@@ -595,13 +614,28 @@ var myaCSFWG = (function () {
         toggleLoadingGif(true);
         var params ={};
         params.method = "POST";
-        params.url = url_link+"back/home/updateAnnouncement";
+        params.url = "/section/back/home/updateAnnouncement";
         params.data = "announcement_text="+document.getElementById("announcement-text").value;
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);        
+        ajaxRequest(params, mainPannelResponse);        
     }
     
     /* ---------event hadlers for home page end -------------*/
+    
+    /* ---------event handlers for the about page begin -----*/
+    function updateAboutPage(ev){
+        ev.preventDefault();
+        toggleLoadingGif(true);
+        var params= {};
+        params.method = "POST";
+        params.url = "/section/back/about/updateAboutPage";
+        params.data = "about_page_text="+document.getElementById("about-page-text").value;
+        params.setHeader = true;
+        console.log(params);
+        ajaxRequest(params, mainPannelResponse);        
+    }
+    
+    /* --------event hadlers for the about page end ---------*/
 
     /* -------- event handlers for the members page start ----*/
     function enterDragHandler(ev){  //event hadler for drag and drop enter effect
@@ -650,11 +684,11 @@ var myaCSFWG = (function () {
                 data_object.group_id = group_elem.getAttribute("data-group");
                 var params = {};
                 params.method = "POST";
-                params.url = url_link+"back/members/groupAssignment";
+                params.url = "/section/back/members/groupAssignment";
                 params.data = createParam(data_object);
                 toggleLoadingGif(true);
                 params.setHeader = true;
-                ajaxRequest(params, main_pannelResponse);
+                ajaxRequest(params, mainPannelResponse);
             }
         }
     };
@@ -663,6 +697,7 @@ var myaCSFWG = (function () {
         This function checks to see if a name
         is allready in a group if it is returns false
         */
+        var name_list, elem_mem;
         name_list = elem.getElementsByTagName("li");
         for(var i=0 ; i < name_list.length ; i++){
             elem_mem = name_list[i].getAttribute("data-id");
@@ -678,10 +713,10 @@ var myaCSFWG = (function () {
         var group_elem = findClassAncestor(ev.target, "drop-area");
         data_object.group_id = group_elem.getAttribute("data-group");
         params.method = "DELETE";
-        params.url = url_link+"back/members/groupAssignment";
+        params.url = "/section/back/members/groupAssignment";
         params.data = createParam(data_object);
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     };
     function addNewMember(ev){ //hadler for adding a brand new member
         ev.preventDefault();
@@ -692,10 +727,10 @@ var myaCSFWG = (function () {
         data_object.last_name = document.getElementById("last-add-member").value;
         data_object.email = document.getElementById("email-add-member").value;
         params.method = "POST";
-        params.url = url_link+"back/members/memberList";
+        params.url = "/section/back/members/memberList";
         params.data = createParam(data_object);
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     };
     function changeMemberRank(ev){ // changing rank of members
         toggleLoadingGif(true);
@@ -703,9 +738,9 @@ var myaCSFWG = (function () {
         data_object.new_rank = ev.target.value;
         data_object.mem_id = ev.target.getAttribute("data-member");
         params.method = "PUT";
-        params.url = url_link+"back/members/memberList";
+        params.url = "/section/back/members/memberList";
         params.data= createParam(data_object);
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function addNewGroup(ev){ // adding a new group
         ev.preventDefault();
@@ -713,10 +748,10 @@ var myaCSFWG = (function () {
         var params = {};
         var group_name = document.getElementById("new-group").value;
         params.method = "POST";
-        params.url = url_link+"back/members/groupList";
+        params.url = "/section/back/members/groupList";
         params.data = "new_name="+group_name;
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function removeGroup(ev){ // removing a group
         var group_elem = findClassAncestor(ev.target, "drop-area");
@@ -729,10 +764,10 @@ var myaCSFWG = (function () {
             toggleLoadingGif(true);
             var params = {};
             params.method = "DELETE";
-            params.url = url_link+"back/members/groupList";
+            params.url = "/section/back/members/groupList";
             params.data = "group_id="+group_id;
             params.setHeader = true;
-            ajaxRequest(params, main_pannelResponse);
+            ajaxRequest(params, mainPannelResponse);
         }
     }
     function changeGroupName(ev){ // changing the group name
@@ -742,19 +777,19 @@ var myaCSFWG = (function () {
         data_object.group_id = group_elem.getAttribute("data-group");
         data_object.new_name = group_elem.getElementsByTagName("input")[0].value;
         params.method = "PUT";
-        params.url = url_link+"back/members/groupList";
+        params.url = "/section/back/members/groupList";
         params.data = createParam(data_object);
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function openReactivateForm(ev){ //opening the reactivate form
         toggleLoadingGif(true);
         var params = {};
         params.method = "GET";
-        params.url = url_link+"back/members/reactivate";
+        params.url = "/section/back/members/reactivate";
         params.data = null;
         params.setHeader = false;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function selectMemberReactivate(ev){ // used to fill out the member info onto the form
         var x = ev.target.selectedIndex;
@@ -770,10 +805,10 @@ var myaCSFWG = (function () {
         data_object.member_id = document.getElementById("id-reactivate").value;
         data_object.email = document.getElementById("email-reactivate").value;
         params.method = "PUT";
-        params.url = url_link+"back/members/reactivate";
+        params.url = "/section/back/members/reactivate";
         params.data = createParam(data_object);
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function changeGroupOfficer(ev){//changing the officer for group
         toggleLoadingGif(true);
@@ -782,10 +817,10 @@ var myaCSFWG = (function () {
         var group_elem = findClassAncestor(ev.target, "drop-area");
         data_object.group_id = group_elem.getAttribute("data-group");
         params.method = "PUT";
-        params.url = url_link+"back/members/officerGroup";
+        params.url = "/section/back/members/officerGroup";
         params.data= createParam(data_object);
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     /* -------- event handlers for the members page end ------*/
 
@@ -812,10 +847,10 @@ var myaCSFWG = (function () {
         toggleLoadingGif(true);
         var params = {};
         params.method = "PUT";
-        params.url = url_link+"back/"+state_obj.page+"/updateQuote";
+        params.url = "/section/back/"+state_obj.page+"/updateQuote";
         params.data = "personal_qt="+document.getElementById("personal-quote").value;
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function memberProfileUpdate(ev){
         /*
@@ -831,9 +866,9 @@ var myaCSFWG = (function () {
         data_object.phone = document.getElementById("update-phone").value;
         data_object.privacy = document.getElementById("update-privacy").value;
         params.method = "PUT";
-        params.url = url_link+"back/"+state_obj.page+"/updateProfile";
+        params.url = "/section/back/"+state_obj.page+"/updateProfile";
         params.data = createParam(data_object);
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function checkValidPassword(ev){
         var new_password = document.getElementById("new-password");
@@ -860,9 +895,9 @@ var myaCSFWG = (function () {
             params.data = null;
         }
         params.method = "PUT";
-        params.url = url_link+"back/"+state_obj.page+"/updatePass";
+        params.url = "/section/back/"+state_obj.page+"/updatePass";
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function checkValidEmail(ev){
         /*
@@ -885,12 +920,12 @@ var myaCSFWG = (function () {
         toggleLoadingGif(true);
         var params = {};
         params.method = "PUT";
-        params.url = url_link+"back/"+state_obj.page+"/updateEmail";
+        params.url = "/section/back/"+state_obj.page+"/updateEmail";
         params.data = "new_email="+document.getElementById("new-email").value;
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
-    function main_pannelResponse(response_ok, response_text){
+    function mainPannelResponse(response_ok, response_text){
         if(response_ok){
             document.getElementById("main-pannel").innerHTML = response_text;
             toggleLoadingGif(false);
@@ -908,7 +943,7 @@ var myaCSFWG = (function () {
         var params = {};
         document.getElementById("submit-pic").disabled = true; // disables the submit till response from server
         params.method = "POST";
-        params.url = url_link+"back/"+state_obj.page+"/uploadPic";
+        params.url = "/section/back/"+state_obj.page+"/uploadPic";
         params.data = new FormData(ev.target);
         params.setHeader = false;
         ajaxRequest(params, pictureUploadResponse);
@@ -932,11 +967,10 @@ var myaCSFWG = (function () {
         document.getElementById("submit-file").disabled = true;
         var params = {};
         params.method = "POST";
-        params.url = url_link+"back/"+state_obj.page+"/submitionUpload";
+        params.url = "/section/back/"+state_obj.page+"/submitionUpload";
         params.data = new FormData(ev.target);
         params.setHeader = false;
         ajaxRequest(params, uploadFileResponse);
-        var xhr = new XMLHttpRequest();
     }
     function uploadFileResponse(response_ok, response_text){
         if(response_ok){
@@ -948,40 +982,128 @@ var myaCSFWG = (function () {
             window.alert("there was a problem loading page error: "+response_text);
         }
     }
+    function displayPaypal(ev){
+        var year = document.getElementById("payment-year-select").value;
+        window.location.replace("/back/"+state_obj.page+"/paypal/"+year);
+    }
+    function sendVouchPayment(ev){
+        var params = {} , year, id;
+        year = document.getElementById("payment-year-select").value; 
+        id = document.getElementById("submit-payment").getAttributeNode("data-id").value; 
+        params.method = "POST";
+        params.url =  "/section/back/profile/"+id+"/recordDuePayment";
+        params.data = "paymentYear="+year+"&vouch=1";
+        params.setHeader = true;
+        toggleLoadingGif(true)
+        ajaxRequest(params, mainPannelResponse);
+    }
     /* --------event handlers for the members profile ends ----*/
 
     /* --------event handler for the group page start ---------*/
     function updateGroupWeekday(ev){ //updating the group weekday using ajax
         var params = {};
         params.method = "PUT";
-        params.url = url_link+"back/"+state_obj.page+"/updateGroupWeekday";
+        params.url = "/section/back/"+state_obj.page+"/updateGroupWeekday";
         params.data = "weekday="+ev.target.value;
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
     }
     function updateGroupDiscription(ev){ //updating the group discription using ajax
         ev.preventDefault();
         var params = {};
         params.method = "PUT";
-        params.url = url_link+"back/"+state_obj.page+"/updateDisc";
+        params.url = "/section/back/"+state_obj.page+"/updateDisc";
         params.data = "discription="+document.getElementById("disc-field").value;
         params.setHeader = true;
-        ajaxRequest(params, main_pannelResponse);
+        ajaxRequest(params, mainPannelResponse);
+    }
+    function uploadGroupPicture(ev){
+        /*
+        form for uploading user picture for the profile picture
+        */
+        ev.preventDefault();
+        toggleLoadingGif(true);
+        var params = {};
+        document.getElementById("submit-pic").disabled = true; // disables the submit till response from server
+        params.method = "POST";
+        params.url = "/section/back/"+state_obj.page+"/uploadGroupPicture";
+        params.data = new FormData(ev.target);
+        params.setHeader = false;
+        ajaxRequest(params, pictureUploadResponse);
     }
     /* --------event heanler for the group page end -----------*/
 
     /* --------event handlers for the arhive page start -------*/
-    function openArchive(ev){
-        var arc_table = ev.target.nextSibling;
+    function openArchive(target_element){
+        var arc_table = target_element.nextSibling, arrow = target_element.firstElementChild;
         if(arc_table.classList.contains('closed-section')){
             arc_table.classList.add('open-section');
             arc_table.classList.remove('closed-section');
+            arrow.innerHTML = " &#9660;";
         } else {
             arc_table.classList.add('closed-section');
             arc_table.classList.remove('open-section');
+            arrow.innerHTML = " &#9654;";
         }
     }
     /* --------event handlers for archive page end ------------*/
+    
+    /* --------event hadlers for admin page start -------------*/
+    function resetKey(ev){
+        var confirm_reset = window.confirm("Are you sure you want to reset encryption key");
+        if(confirm_reset){
+            var params = {};
+            params.method = "PUT";
+            params.url = "section/admin/resetKey";
+            params.data = null;
+            params.setHeader = false;
+            console.log(params);
+            ajaxRequest(params, mainPannelResponse);
+        }
+    }
+    function changeDueDate(ev){
+        var params = {} , due_month, due_day;
+        due_month = document.getElementById("due-date-month").value;
+        due_day = document.getElementById("due-date-day").value;
+        params.method = "PUT";
+        params.url = "section/admin/changeDueDate";
+        params.data = "due_day=" + due_day + "&due_month=" + due_month;
+        params.setHeader = true;
+        ajaxRequest(params, mainPannelResponse);
+    }
+    /* --------event hadlers for admin page end -------------*/
+    /* --------event handler for resouce page beging --------*/
+    function updateResourcePara(ev){
+        var params = {};
+        params.method = "POST";
+        params.url = "/section/back/resources/resourcePara";
+        params.data = "paragraph=" + document.getElementById("resource-paragraph").value;
+        params.setHeader = true;
+        toggleLoadingGif(true);
+        ajaxRequest(params, mainPannelResponse);
+    }
+    function uploadResourceFile(ev){
+        var params = {};
+        params.method = "POST";
+        params.url = "/section/back/resources/resourceList";
+        params.data = new FormData(ev.target);
+        params.setHeader = false;
+        toggleLoadingGif(true);
+        document.getElementById("submit-file").disabled = true;
+        ajaxRequest(params, uploadFileResponse);
+    }
+    function deleteResourceFile(ev){
+        var params = {} , path, resource_id;
+        path = ev.target.getAttributeNode('data-path').value;
+        resource_id = ev.target.getAttributeNode('data-resource-id').value;
+        params.method = "DELETE";
+        params.url = "/section/back/resources/resourceList";
+        params.data = "path=" + path + "&resource_id=" + resource_id;
+        params.setHeader = true;
+        toggleLoadingGif(true);
+        ajaxRequest(params, mainPannelResponse);
+    }
+    /* --------event handler for resource page end ----------*/
     function toggleLoadingGif(load){
     /*
     this adds loading gif to main pannel and removes it
@@ -995,6 +1117,23 @@ var myaCSFWG = (function () {
             document.getElementById("main-pannel").style.opacity = "1";
             document.getElementById("loading-pannel").style.display = "none";
         }
+    }
+    function paypalResponse(response_ok, response_text){
+        if(response_ok){
+            document.getElementById("main-pannel").innerHTML = response_text;
+            toggleLoadingGif(false);
+            updatePath();
+        } else {
+            toggleLoadingGif(false);
+            updatePath();
+            window.alert("there was a problem loading page error: "+response_text);
+        }
+    }
+    function updatePath(){
+        var id;
+        id = document.getElementById("profile-title").getAttributeNode('data-id').value;
+        state_obj.page = "profile/"+id;
+        history.replaceState(state_obj, "", "/"+state_obj.page); 
     }
     return {
         /*
@@ -1057,10 +1196,21 @@ var myaCSFWG = (function () {
                         toggleLoadingGif(false);
                     };
                 };
-                xhr.open("get", url_link+event.state.page, true);
+                xhr.open("get", "/section/"+event.state.page, true);
                 xhr.send();
             }
 
+        } ,
+        sendPayment: function () {
+            var params = {} , year, id;
+            year = document.getElementById("paypal-button").getAttributeNode("data-year").value; 
+            id = document.getElementById("paypal-button").getAttributeNode("data-id").value; 
+            params.method = "POST";
+            params.url =  "/section/back/profile/"+id+"/recordDuePayment";
+            params.data = "paymentYear="+year+"&vouch=0";
+            params.setHeader = true;
+            toggleLoadingGif(true);
+            ajaxRequest(params, paypalResponse);
         }
     }
 }());

@@ -10,13 +10,14 @@
 
 <body>
 <div id="wrap">
-		<div id="calendar-section">
-		<img id="calendar-icon" src="<?php echo $request_obj->full_url ?>images/calendar.png">
-	    <div id="calendar-pannel" class="closed-section">
-	    </div>
-		<div id="calendar-event" class="closed-section">
-		</div>
-		</div>
+    <img id="title-image" src="/images/header.png">
+    <div id="calendar-section">
+        <img id="calendar-icon" src="<?php echo $request_obj->full_url ?>images/calendar.png">
+        <div id="calendar-pannel" class="closed-section">
+        </div>
+        <div id="calendar-event" class="closed-section">
+        </div>
+    </div>
 	<div id="nav-bar">
 	    <ul>
             <li>
@@ -29,25 +30,19 @@
 	            <a href="/groups" class="nav-link" data-link="groups">Groups</a>
 	        </li>
 	        <li>
-	            <a href="/workshop" class="nav-link" data-link="workshop">Workshop</a>
-	        </li>
-	        <li>
 	            <a href="/resources" class="nav-link" data-link="resources">Resources</a>
 	        </li>
-	        <li>
-	            <a href="/archive" class="nav-link" <?php echo $nav_display ?> data-link="archive">Archive</a>
+	        <li <?php echo $nav_display ?> >
+	            <a href="/archive" class="nav-link"  data-link="archive">Archive</a>
 	        </li>
-	        <li>
-	            <a href="/members" class="nav-link" <?php echo $nav_display ?> data-link="members">Members</a>
+	        <li <?php echo $nav_display ?> >
+	            <a href="/members" class="nav-link"  data-link="members">Members</a>
 	        </li>
-            <li>
-                <a href="/admin" class="nav-link" <?php echo $admin_display ?> data-link="admin">Admin page</a>
+            <li <?php echo $admin_display ?> >
+                <a href="/admin" class="nav-link"  data-link="admin">Admin page</a>
             </li>
 	    </ul>
-	</div>
-    <div id="logo">
-        <img src="<?php echo $request_obj->full_url ?>images/CSFWG2013.jpg" width="200" height="113" alt="logo" />
-    </div>
+	</div> 
     <div id="right-pannel">
         <?php include "htmlfrag/right_pannel.php"; ?>
     </div>

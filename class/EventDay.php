@@ -93,7 +93,7 @@ class EventDay
 		$form .= '
 				</select></p>
 				<div id="event-end-area" class="'.$event_end_area_class.'">
-					<p>When the events ends <img src="images/Calendar.png" id="mini-calendar-icon" alt="mini calendar"><div id="mini-calendar" class="closed-section"></div></p>
+					<p>When the events ends <img src="/images/Calendar.png" id="mini-calendar-icon" alt="mini calendar"><div id="mini-calendar" class="closed-section"></div></p>
 					<label for="event-end-month">Month:</label>
 					<input type="text" id="event-end-month" maxlength="2" size="2" value="'.$this->event_end_month.'">
 					<label for="event-end-day">day:</label>

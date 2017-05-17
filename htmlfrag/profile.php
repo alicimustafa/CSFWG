@@ -1,7 +1,7 @@
 <?php 
 /* 
 this file creates and displays member profile
-it will also give sertan member ability to modify
+it will also give certain member ability to modify
 this info
 */
 // default for error
@@ -25,10 +25,11 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 	*/
 	if(isset($request_obj->arg[1])){ 
 		if($request_obj->arg[1] == "updateProfile"){updateMemberProfile($request_obj);}
-		
+		if($request_obj->arg[1] == "updatePass"){updateUserPassword($request_obj, $error);}
+		if($request_obj->arg[1] == "updateEmail"){updateUserEmail($request_obj);}
+		if($request_obj->arg[1] == "updateQuote"){updatPesonalQuote($request_obj);}
 		if($request_obj->arg[1] == "uploadPic"){uploadMemberPicture($request_obj);}
 		
-		if($request_obj->arg[1] == "updatePass"){updateUserPassword($request_obj, $error);}
 		if($request_obj->arg[1] == "submitionUpload"){
 			$tabs['profile_section'] ="closed-section";
 			$tabs['submit_section'] ="open-section";
@@ -36,8 +37,19 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 			$tabs['submit_tab'] ="open-tab";
 			uploadMemberSubmitions($request_obj);
 		}
-		if($request_obj->arg[1] == "updateEmail"){updateUserEmail($request_obj);}
-		if($request_obj->arg[1] == "updateQuote"){updatPesonalQuote($request_obj);}
+        if($request_obj->arg[1] == "recordDuePayment"){
+            $tabs['profile_section'] ="closed-section";
+            $tabs['dues_section'] ="open-section";
+            $tabs['profile_tab'] ="closed-tab";
+            $tabs['dues_tab'] ="open-tab";
+            recordDuePayment($request_obj);
+        }
+        if($request_obj->arg[1] == "paypal"){
+            $tabs['profile_section'] ="closed-section";
+            $tabs['dues_section'] ="open-section";
+            $tabs['profile_tab'] ="closed-tab";
+            $tabs['dues_tab'] ="open-tab";
+        }
 	}
 	$row = getMemberInformation($request_obj);
 	$flip_button = "<button class='rotate-button' type='button'>&#8617</button>";
@@ -71,10 +83,11 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 		<input type="submit" id="submit-pic" value="Send picture" >
 	';
 	$quote_form = '
-	    <textarea id="personal-quote" form="personal-quote-form" cols="30" rows="30">'.$row['member_qt'].'</textarea>
+	    <textarea id="personal-quote" form="personal-quote-form" cols="50" rows="18">'.$row['member_qt'].'</textarea><br>
 		<input type="submit" value"Change personal Quote">
 	';
 	//variable that hold the change password form
+    
 	if($request_obj->user_id == $request_obj->arg[0]){
 		$change_password = '
 			<p>Enter current password: <input type="password" id="current-password"><span class="error">'.$error['password'].'</span></p>
@@ -82,11 +95,66 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 			<p>Confirm password: <input type="password" id="verify-password"><span class="error">'.$error['verify'].'</span></p>
 			<input type="submit" value="Change password" disabled id="change-password-submit" >
 		';
+        if(isset($request_obj->arg[1]) and  $request_obj->arg[1] == "paypal"){
+            $due_payment_form ="
+                <div id='paypal-button' data-year='".$request_obj->arg[2]."' data-id='".$request_obj->arg[0]."'></div>
+                <script src='https://www.paypalobjects.com/api/checkout.js'></script>
+                <script>
+                    paypal.Button.render({
+                    
+                        env: 'sandbox', // Optional: specify 'sandbox' environment
+                    
+                        client: {
+                            sandbox:    'AXNDn_b_4KxjdPK0uOo6Vfq95PDXIuoKWKvk8OWCZUHQyGsCyk1XX4IhQZhLZK_80dH85RRZJgR2hVq5',
+                            production: 'xxxxxxxxx'
+                        },
+
+                        payment: function() {
+                        
+                            var env    = this.props.env;
+                            var client = this.props.client;
+                        
+                            return paypal.rest.payment.create(env, client, {
+                                transactions: [
+                                    {
+                                        amount: { total: '25.00', currency: 'USD' }
+                                    }
+                                ]
+                            });
+                        },
+
+                        commit: true, // Optional: show a 'Pay Now' button in the checkout flow
+
+                        onAuthorize: function(data, actions) {
+                        
+                            // Optional: display a confirmation page here
+                        
+                            return actions.payment.execute().then(function() {
+                                myaCSFWG.sendPayment();
+                            });
+                        }
+
+                    }, '#paypal-button');
+                </script>
+            ";
+        } else {
+            $due_payment_form = "<p>Payment for year: <select id='payment-year-select'>";
+            foreach(generatePaymentYear() as $value){
+                $due_payment_form .= "<option value='".$value."'>".$value."</option>";
+            }  
+            $due_payment_form .="</select><button type='button' id='payment-year-button' >Create paypal button</button></p>";
+        }
 	} else {
 		$change_password = '
 		    <p>Reset this members password to default</p>
 		    <input type="submit" value="Reset password">
 		';
+        $due_payment_form = "<p>Payment for year: <select id='payment-year-select'>";
+        foreach(generatePaymentYear() as $value){
+            $due_payment_form .= "<option value='".$value."'>".$value."</option>";
+        }    
+        $due_payment_form .="</select>";
+        $due_payment_form .="<button type='button' id='submit-payment' data-id='".$request_obj->arg[0]."'>Submit Payment</button></p>";
 	}
 	//variable that holds the change email form
 	$change_email = '
@@ -112,7 +180,8 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 		SELECT 
 		archive_path, archive_disc, monthname(submit_date) AS mon
 		FROM archive
-		WHERE member_id = 1
+		WHERE member_id = :id
+        LIMIT 10
 		ORDER BY mon DESC
 	";
 	include('class/connect.php');
@@ -123,6 +192,7 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 		$path_part = explode("/" , $tab_row['archive_path']);
 		$submit_table .= "<tr><td>".$path_part[3]."</td><td>".$tab_row['archive_disc']."</td><td>".$tab_row['mon']."</td></tr>";
 	}
+    $paymetn_list_table = createPaymentList($request_obj);
 } else { //this is the section that will display info for those that do not have modify priviladge
 	$row = getMemberInformation($request_obj);
 	$flip_button = "";
@@ -133,10 +203,12 @@ if($request_obj->account_priv == "Admin" or $request_obj->account_priv == "Offic
 	$quote_form = "";
 	$file_upload ="";
 	$submit_table = "";
+    $due_payment_form ="";
+    $paymetn_list_table="";
 	if($row['member_privacy'] == "1"){$full_display = true;} //this will show full display to everyone if the pricacy is set to 1
 	if($row['member_privacy'] == "2" and $request_obj->valid_user){$full_display = true;}// this show info to loged in members
 }
-$welcome = "This is profile for ".$row['first_nm'];
+$welcome = "<h4 id='profile-title' data-id='".$row['member_id']."'>This is profile for ".$row['first_nm']."</h4>";
 if($full_display){ // this to displaying info for the member based on privacy levels and ranks
 	$profile_name = $row['first_nm']." ".$row['last_nm'];
 	$profile_addres = "<p>Address: ".$row['member_address']." ".$row['member_city']." ".$row['member_state']." ".$row['member_zip']."</p>";
@@ -150,6 +222,51 @@ if($row['member_pic']){  // this checks to see if there is a picture for the mem
 	$pic_path = $row['member_pic'];
 } else {
 	$pic_path = "images/profilePics/default.jpg";
+}
+function recordDuePayment($request_obj){
+    $col_select = "
+        INSERT INTO due_payment
+        (payment_date, payment_year, payment_vouch, member_id)
+        VALUES 
+        (curdate(), :year, :vouch, :member)    
+    ";
+    $up_array[':year'] = $_REQUEST['paymentYear'];
+    $up_array[':vouch'] = $_REQUEST['vouch'] == 0 ? 0 : $request_obj->user_id;
+    $up_array[':member'] = $request_obj->arg[0];
+	include("class/connect.php");
+    $stmt = $pdo->prepare($col_select);
+	$stmt->execute($up_array);
+}
+function createPaymentList($request_obj){
+    $col_select = "
+        SELECT 
+        members.first_nm,
+        due_payment.payment_date,
+        due_payment.payment_year,
+        due_payment.payment_vouch
+        FROM due_payment
+        LEFT OUTER JOIN members ON due_payment.payment_vouch = members.member_id
+        WHERE due_payment.member_id = :id
+        ORDER BY due_payment.payment_year DESC
+    ";
+    $payment_table = "";
+	include("class/connect.php");
+    $stmt = $pdo->prepare($col_select);
+	$stmt->execute(array(":id"=>$request_obj->arg[0]));
+    while($row = $stmt->fetch(PDO::FETCH_ASSOC)){
+        $payment_method = $row['payment_vouch'] == 0 ? "Paypal" : "In Person -".$row['first_nm'];
+        $payment_table .= "<tr><td>".$row['payment_year']."</td><td>".$row['payment_date']."</td><td>".$payment_method."</td></tr>";
+    }
+    return $payment_table;
+}
+function generatePaymentYear(){
+    $year_array = array();
+    $start_year = date("Y") - 2;
+    for( $i = 0; $i <= 4; $i++){
+        $year_array[$i] = $start_year;
+        $start_year++;
+    }
+    return $year_array;
 }
 function updatPesonalQuote($request_obj){
 	$up_array = array(":qt" => $_REQUEST['personal_qt'], ":id" => $request_obj->arg[0]);
@@ -193,8 +310,8 @@ function updateUserPassword($request_obj, $error){
 		    $stmt = $pdo->prepare($col_input);
 			$stmt->execute($up_array);
 			$row = $stmt->fetch(PDO::FETCH_NUM);
-			if($_REQUEST['current_password'] === $row[0]){ // checks to see if current password is correct 
-				$up_array[':password'] = $_REQUEST['new_password'];
+			if($_REQUEST['current_password'] === $row[0] or password_verify($_REQUEST['current_password'], $row[0])){ // checks to see if current password is correct 
+				$up_array[':password'] = password_hash($_REQUEST['new_password'], PASSWORD_DEFAULT);
 				$col_input = "
 				    UPDATE log_in
 					SET log_pw = :password
@@ -351,7 +468,7 @@ function uploadMemberSubmitions($request_obj){
 
 <div class="rotateable front-pannel <?php if($request_obj->back){echo "flipped";} ?> ">
     <?php echo $flip_button ?>
-	<h2> <?php echo $welcome; ?> </h2>
+	<?php echo $welcome; ?>
 	<div class="profile-pic"><img src="<?php echo $request_obj->full_url.$pic_path; ?>" alt="profle picture"></div>
 	<div class="profile-qte">
 	    <p><?php echo $row['member_qt'] ?></p>
@@ -363,7 +480,7 @@ function uploadMemberSubmitions($request_obj){
 </div>
 <div class="rotateable back-pannel <?php if($request_obj->back){echo "flipped";} ?>">
     <?php echo $flip_button ?>
-	<h2> <?php echo $welcome; ?> </h2>
+	<?php echo $welcome; ?> 
 	<div class="profile-pic"><img src="<?php echo $request_obj->full_url.$pic_path; ?>" alt="profile picture">
 		<form enctype="multipart/form-data" action="" method="POST" id="upload-pic">
 		    <?php echo $picture_form; ?>
@@ -385,16 +502,25 @@ function uploadMemberSubmitions($request_obj){
 	<div id="profile-update" class="<?php echo $tabs['profile_section']; ?>">
 	    <p>Name: <?php echo $profile_name; ?> Rank: <?php echo $row['rank_name']; ?></p>
 	    <form id="profile-form">
+          <fieldset>
+            <legend>Profile Area</legend>
 		    <?php echo $profile_form; ?>
+          </fieldset>
 		</form>
 		<form id="change-password">
+          <fieldset>
+            <legend>Password Area</legend>
 		    <?php echo $change_password; ?>
+          </fieldset>
 		</form>
 		<form id="change-email">
+          <fieldset>
+            <legend>Email Area</legend>
 		    <?php echo $change_email; ?>
+          </fieldset>
 		</form>
 	</div>
-	<div id="archive-update" class="<?php echo $tabs['submit_section']; ?>">
+	<div id="archive-update" class="<?php echo $tabs['submit_section']; ?> auto-scroll">
 	    <form enctype="multipart/form-data" action="" method="POST" id="upload-file">
 		    <?php echo $file_upload; ?>
 		</form>
@@ -403,11 +529,24 @@ function uploadMemberSubmitions($request_obj){
 		        <tr><th>File Name</th><th>File Discription</th><th>Upload Date</th></tr>
 			</thead>
 			<tbody>
-			<?php echo $submit_table ?>
+			<?php echo $submit_table; ?>
 			</tbody>
 		</table>
 	</div>
 	<div id="dues-section" class="<?php echo $tabs['dues_section'] ?>">
-	
+	    <form id="due-payment-form">
+          <fieldset>
+            <legend>Due Payment Area</legend>
+            <?php echo $due_payment_form; ?>
+          </fieldset>  
+        </form>
+        <table>
+            <tr>
+                <th>Payment Year</th>
+                <th>Date Payment Submited</th>
+                <th>Payment Method</th>
+            </tr>
+            <?php echo $paymetn_list_table; ?>
+        </table>
 	</div>
 </div>
